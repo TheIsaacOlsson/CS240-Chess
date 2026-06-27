@@ -2,6 +2,7 @@ package chess;
 
 import chess.moveCalculators.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,38 +24,32 @@ public class PieceMoveCalculator {
         return board;
     }
 
-    public Collection<ChessMove> possibleMoves() {
-        // Turn this into a general form version to be inherited and move the switch designation to ChessPiece.pieceMoves()
-        ChessPiece piece = board.getPiece(position);
-        ChessPiece.PieceType designation = piece.getPieceType();
-        switch (designation) {
-            case KING -> {
-                KingMoveCalculator calculator = new KingMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            case QUEEN -> {
-                QueenMoveCalculator calculator = new QueenMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            case BISHOP -> {
-                BishopMoveCalculator calculator = new BishopMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            case ROOK -> {
-                RookMoveCalculator calculator = new RookMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            case KNIGHT -> {
-                KnightMoveCalculator calculator = new KnightMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            case PAWN -> {
-                PawnMoveCalculator calculator = new PawnMoveCalculator(board, position);
-                return calculator.possibleMoves();
-            }
-            default -> {
-                return List.of();
+    public Collection<ChessMove> possibleMoves(int[][] relativeMovement, int movementRange) {
+        ChessPiece myself = board.getPiece(position);
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int startRow = position.getRow();
+        int startCol = position.getColumn();
+        for (int[] move : relativeMovement) {
+            for (int distance = 1; distance <= movementRange; distance++) { // For movementRange==1, will only run once
+                int endRow = startRow + move[0]*distance;
+                int endCol = startCol + move[1]*distance;
+                if (endRow < 1 || endRow > 8 || endCol < 1 || endCol > 8) {
+                    break;
+                } else {
+                    ChessPosition endPosition = new ChessPosition(endRow, endCol);
+                    ChessPiece occupant = board.getPiece(endPosition);
+                    if (occupant == null) {
+                        moves.add(new ChessMove(position, endPosition, null));
+                    } else if (occupant.getTeamColor().equals(myself.getTeamColor())) {
+                        break;
+                    } else {
+                        moves.add(new ChessMove(position, endPosition, null));
+                        break;
+                    }
+                }
             }
         }
+
+        return moves;
     }
 }
