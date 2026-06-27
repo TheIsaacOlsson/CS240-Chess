@@ -24,6 +24,7 @@ public class PieceMoveCalculator {
     }
 
     public Collection<ChessMove> possibleMoves() {
+        // Turn this into a general form version to be inherited and move the switch designation to ChessPiece.pieceMoves()
         ChessPiece piece = board.getPiece(position);
         ChessPiece.PieceType designation = piece.getPieceType();
         switch (designation) {

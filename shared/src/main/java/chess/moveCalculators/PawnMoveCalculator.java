@@ -4,6 +4,7 @@ import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class PawnMoveCalculator extends PieceMoveCalculator {
 
@@ -37,7 +38,7 @@ public class PawnMoveCalculator extends PieceMoveCalculator {
                 ChessPosition endPosition = new ChessPosition(endRow, endCol);
                 ChessPiece occupant = board.getPiece(endPosition);
                 if (!(occupant == null) && !(occupant.getTeamColor().equals(myself.getTeamColor()))) {
-                    moves.add(new ChessMove(position, endPosition, null));
+                    moves.addAll(possiblePromotions(position, endPosition, orientation));
                 }
             }
         }
@@ -46,7 +47,7 @@ public class PawnMoveCalculator extends PieceMoveCalculator {
             ChessPosition endPosition = new ChessPosition(startRow+orientation, startCol);
             ChessPiece occupant = board.getPiece(endPosition);
             if (occupant == null) {
-                moves.add(new ChessMove(position, endPosition, null));
+                moves.addAll(possiblePromotions(position, endPosition, orientation));
 
                 if (orientation == 1 && startRow == 2 || orientation == -1 && startRow == 7) {
                     endPosition = new ChessPosition(startRow+2*orientation, startCol);
@@ -59,5 +60,18 @@ public class PawnMoveCalculator extends PieceMoveCalculator {
         }
 
         return moves;
+    }
+
+    private Collection<ChessMove> possiblePromotions(ChessPosition startPosition, ChessPosition endPosition, byte orientation) {
+        if (orientation==1 && endPosition.getRow() == 8 || orientation==-1 && endPosition.getRow() == 1) {
+            ArrayList<ChessMove> allPromotions = new ArrayList<>();
+            for (ChessPiece.PieceType type : chess.ChessPiece.PieceType.values()) {
+                if (type.equals(ChessPiece.PieceType.PAWN) || type.equals(ChessPiece.PieceType.KING)) {continue;}
+                allPromotions.add(new ChessMove(startPosition, endPosition, type));
+            }
+            return allPromotions;
+        } else {
+            return List.of(new ChessMove(startPosition, endPosition, null));
+        }
     }
 }
