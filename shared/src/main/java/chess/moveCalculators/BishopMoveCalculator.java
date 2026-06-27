@@ -2,13 +2,11 @@ package chess.moveCalculators;
 
 import chess.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class BishopMoveCalculator extends PieceMoveCalculator {
 
-    private final int[][] relativeMovement= {
+    private final static int[][] relativeMovement= {
             {1, 1},
             {1, -1},
             {-1, -1},
@@ -21,6 +19,7 @@ public class BishopMoveCalculator extends PieceMoveCalculator {
         moves = super.possibleMoves(relativeMovement, 8);
     }
 
+    @Override
     public Collection<ChessMove> getMoves() {
         return moves;
     }

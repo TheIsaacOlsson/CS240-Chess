@@ -8,20 +8,27 @@ import java.util.List;
 
 public class PawnMoveCalculator extends PieceMoveCalculator {
 
-    private final int[][] relativeMovement= {
+    private final static int[][] relativeMovement= {
             {0, 1}
     };
-    private final int[][] captureMovement= {
+    private final static int[][] captureMovement= {
             {1, 1},
             {1, -1}
     };
+    private final Collection<ChessMove> moves;
 
     public PawnMoveCalculator(ChessBoard board, ChessPosition position) {
         super(board, position);
+        moves = possibleMoves(relativeMovement, 8);
     }
 
     @Override
-    public Collection<ChessMove> possibleMoves() {
+    public Collection<ChessMove> getMoves() {
+        return moves;
+    }
+
+    @Override
+    public Collection<ChessMove> possibleMoves(int[][] relativeMovement, int range) {
         ChessBoard board = super.getBoard();
         ChessPosition position = super.getPosition();
         ChessPiece myself = board.getPiece(position);

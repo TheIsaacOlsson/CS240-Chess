@@ -10,10 +10,15 @@ public class PieceMoveCalculator {
 
     private final ChessBoard board;
     private final ChessPosition position;
+    private final Collection<ChessMove> moves = List.of();
 
     public PieceMoveCalculator(ChessBoard board, ChessPosition position) {
         this.board = board;
         this.position = position;
+    }
+
+    public Collection<ChessMove> getMoves() {
+        return moves;
     }
 
     public ChessPosition getPosition() {
