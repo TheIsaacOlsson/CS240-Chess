@@ -1,6 +1,6 @@
 package chess;
 
-import chess.moveCalculators.KingMoveCalculator;
+import chess.moveCalculators.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +29,26 @@ public class PieceMoveCalculator {
         switch (designation) {
             case KING -> {
                 KingMoveCalculator calculator = new KingMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            case QUEEN -> {
+                QueenMoveCalculator calculator = new QueenMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            case BISHOP -> {
+                BishopMoveCalculator calculator = new BishopMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            case ROOK -> {
+                RookMoveCalculator calculator = new RookMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            case KNIGHT -> {
+                KnightMoveCalculator calculator = new KnightMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            case PAWN -> {
+                PawnMoveCalculator calculator = new PawnMoveCalculator(board, position);
                 return calculator.possibleMoves();
             }
             default -> {
