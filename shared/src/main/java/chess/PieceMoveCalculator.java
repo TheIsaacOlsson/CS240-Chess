@@ -1,5 +1,7 @@
 package chess;
 
+import chess.moveCalculators.KingMoveCalculator;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +16,16 @@ public class PieceMoveCalculator {
     }
 
     public Collection<ChessMove> possibleMoves() {
-        return List.of();
+        ChessPiece piece = board.getPiece(position);
+        ChessPiece.PieceType designation = piece.getPieceType();
+        switch (designation) {
+            case KING -> {
+                KingMoveCalculator calculator = new KingMoveCalculator(board, position);
+                return calculator.possibleMoves();
+            }
+            default -> {
+                return List.of();
+            }
+        }
     }
 }
