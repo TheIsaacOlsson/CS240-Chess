@@ -1,22 +1,23 @@
 package chess.moveCalculators;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.PieceMoveCalculator;
+import chess.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class KingMoveCalculator extends PieceMoveCalculator {
 
-    private final int[][] relativeMovement = {
-            {1, 0},
+    private final int[][] relativeMovement= {
+            {0, 1},
             {1, 1},
-            {0, 1}
+            {1, 0},
+            {1, -1},
+            {0, -1},
+            {-1, -1},
+            {-1, 0},
+            {-1, 1}
     };
-    private final boolean anyDistance = false;
-    private final boolean anyDirection = true;
 
     public KingMoveCalculator(ChessBoard board, ChessPosition position) {
         super(board, position);
@@ -24,6 +25,26 @@ public class KingMoveCalculator extends PieceMoveCalculator {
 
     @Override
     public Collection<ChessMove> possibleMoves() {
-        return List.of();
+        ChessBoard board = super.getBoard();
+        ChessPosition position = super.getPosition();
+        ChessPiece myself = board.getPiece(position);
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int startRow = position.getRow();
+        int startCol = position.getColumn();
+        for (int[] move : relativeMovement) {
+            int endRow = startRow + move[0];
+            int endCol = startCol + move[1];
+            if (endRow < 1 || endRow > 8 || endCol < 1 || endCol > 8) {
+                continue;
+            } else {
+                ChessPosition endPosition = new ChessPosition(endRow, endCol);
+                ChessPiece occupant = board.getPiece(endPosition);
+                if (occupant == null || !(occupant.getTeamColor().equals(myself.getTeamColor()))) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+            }
+        }
+
+        return moves;
     }
 }

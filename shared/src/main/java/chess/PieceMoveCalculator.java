@@ -15,6 +15,14 @@ public class PieceMoveCalculator {
         this.position = position;
     }
 
+    public ChessPosition getPosition() {
+        return position;
+    }
+
+    public ChessBoard getBoard() {
+        return board;
+    }
+
     public Collection<ChessMove> possibleMoves() {
         ChessPiece piece = board.getPiece(position);
         ChessPiece.PieceType designation = piece.getPieceType();
