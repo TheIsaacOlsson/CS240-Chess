@@ -142,7 +142,7 @@ public class ChessGame {
      * @param originalType The type of piece it was before the move
      * @param capturedPiece The piece that was captured during the move
      */
-    record MoveRecord(ChessMove move, ChessPiece.PieceType originalType, ChessPiece capturedPiece) {}
+    public record MoveRecord(ChessMove move, ChessPiece.PieceType originalType, ChessPiece capturedPiece) {}
 
     /**
      * Reverses the changes caused by a move. Returns the piece to its original location and restores captured pieces.
