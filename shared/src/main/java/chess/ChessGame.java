@@ -13,11 +13,15 @@ public class ChessGame {
 
     private TeamColor turn;
     private ChessBoard gameBoard;
+    private ChessPosition whiteKingPosition;
+    private ChessPosition blackKingPosition;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         gameBoard = new ChessBoard();
         gameBoard.resetBoard();
+        whiteKingPosition = new ChessPosition(1, 5);
+        blackKingPosition = new ChessPosition(8, 5);
     }
 
     /**
@@ -84,7 +88,20 @@ public class ChessGame {
             throw moveException;
         }
 
+        ChessPiece movingPiece = gameBoard.getPiece(move.getStartPosition());
+        ChessPiece.PieceType pieceType = movingPiece.getPieceType();
+        ChessPiece capturedPiece = gameBoard.getPiece(move.getEndPosition());
+
         gameBoard.movePiece(move);
+        if (isInCheck(movingPiece.getTeamColor())) {
+            undoMove(move, pieceType, capturedPiece);
+            throw new InvalidMoveException("Cannot willingly put/keep your King in check.");
+        }
+    }
+
+    private void undoMove(ChessMove move, ChessPiece.PieceType originalType, ChessPiece capturedPiece) {
+        gameBoard.movePiece(new ChessMove(move.getEndPosition(), move.getStartPosition(), originalType));
+        gameBoard.addPiece(move.getEndPosition(), capturedPiece);
     }
 
     /**
@@ -113,7 +130,21 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = (teamColor.equals(TeamColor.WHITE)) ? whiteKingPosition : blackKingPosition;
+
+        for (ChessPosition occupiedPosition : gameBoard.getOccupiedPositions()) {
+            ChessPiece occupant = gameBoard.getPiece(occupiedPosition);
+            if (occupant.getTeamColor().equals(teamColor)) {continue;}
+            Collection<ChessMove> moves = occupant.pieceMoves(gameBoard, occupiedPosition);
+
+            for (ChessMove possibleCapture : moves) {
+                if (possibleCapture.getEndPosition().equals(kingPosition)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -123,7 +154,16 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if ( ! isInCheck(teamColor)) {return false;}
+
+        for (ChessPosition occupiedPosition : gameBoard.getOccupiedPositions()) {
+            ChessPiece occupant = gameBoard.getPiece(occupiedPosition);
+            if ( ! occupant.getTeamColor().equals(teamColor)) {continue;}
+
+            if ( ! validMoves(occupiedPosition).isEmpty()) {return false;}
+        }
+
+        return true;
     }
 
     /**

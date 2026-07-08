@@ -20,6 +20,13 @@ public class ChessBoard {
     }
 
     /**
+     * Returns the set of occupied positions
+     */
+    public HashSet<ChessPosition> getOccupiedPositions() {
+        return occupiedPositions;
+    }
+
+    /**
      * Adds a chess piece to the chessboard
      *
      * @param position where to add the piece to
