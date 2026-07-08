@@ -11,9 +11,13 @@ import java.util.Collection;
 public class ChessGame {
 
     private TeamColor turn;
+    private ChessBoard gameBoard;
+    private ChessMove lastMove = null;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
+        gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
     }
 
     /**
@@ -58,7 +62,32 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        try {
+            testMove(move);
+        } catch (InvalidMoveException moveException) {
+            throw moveException;
+        }
+
+        gameBoard.movePiece(move);
+    }
+
+    /**
+     * Checks if a move is valid.
+     *
+     * @param move The move being checked
+     * @throws InvalidMoveException when the given move cannot/should not be completed
+     */
+    private void testMove(ChessMove move) throws InvalidMoveException {
+        ChessPosition startSquare = move.getStartPosition();
+        ChessPiece movingPiece = gameBoard.getPiece(startSquare);
+        if (movingPiece == null) {throw new InvalidMoveException("No piece at start position");}
+
+        Collection<ChessMove> pieceMoves = movingPiece.pieceMoves(gameBoard, startSquare);
+        if ( ! pieceMoves.contains(move)) {throw new InvalidMoveException("Invalid movement");}
+
+        ChessPosition targetSquare = move.getEndPosition();
+        ChessPiece occupant = gameBoard.getPiece(targetSquare);
+        if (movingPiece.getTeamColor().equals(occupant.getTeamColor())) {throw new InvalidMoveException("Occupied target position");}
     }
 
     /**
@@ -107,6 +136,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return gameBoard;
     }
 }

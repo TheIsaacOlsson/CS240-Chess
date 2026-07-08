@@ -31,6 +31,16 @@ public class ChessBoard {
     }
 
     /**
+     * Removes a piece from the board at the given location
+     *
+     * @param position the position for which to delete the occupying piece.
+     */
+    public void deletePiece(ChessPosition position) {
+        squares[position.getRow()-1][position.getColumn()-1] = null;
+        occupiedPositions.remove(position);
+    }
+
+    /**
      * Gets a chess piece on the chessboard
      *
      * @param position The position to get the piece from
@@ -39,6 +49,21 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
+    }
+
+    /**
+     * Moves a piece from one location to another, removing any occupying piece if necessary.
+     *
+     * @param move The movement being executed. DOES NOT REQUIRE A VALID MOVE.
+     */
+    public void movePiece(ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece movingPiece = getPiece(startPosition);
+        deletePiece(endPosition);
+        deletePiece(startPosition);
+        ChessPiece.PieceType prestigeType = (move.getPromotionPiece() == null) ? movingPiece.getPieceType() : move.getPromotionPiece();
+        addPiece(endPosition, new ChessPiece(movingPiece.getTeamColor(), prestigeType));
     }
 
     /**
