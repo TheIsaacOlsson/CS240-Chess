@@ -82,6 +82,7 @@ public class ChessGame {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         ChessGame sandbox = new ChessGame(this);
+        sandbox.setTeamTurn(piece.getTeamColor());
 
         for (ChessMove move : providedMoves) {
             try{
@@ -109,19 +110,19 @@ public class ChessGame {
         ChessPiece movingPiece = gameBoard.getPiece(startSquare);
         if (movingPiece == null) {throw new InvalidMoveException("No piece at start position");}
 
+        TeamColor team = movingPiece.getTeamColor();
+        if ( ! team.equals(getTeamTurn())) {throw new InvalidMoveException("Wrong turn");}
+
         Collection<ChessMove> pieceMoves = movingPiece.pieceMoves(gameBoard, startSquare);
         if ( ! pieceMoves.contains(move)) {throw new InvalidMoveException("Invalid movement");}
 
         ChessPosition targetSquare = move.getEndPosition();
         ChessPiece occupant = gameBoard.getPiece(targetSquare);
-        if (occupant!=null && movingPiece.getTeamColor().equals(occupant.getTeamColor())) {throw new InvalidMoveException("Occupied target position");}
+        if (occupant!=null && team.equals(occupant.getTeamColor())) {throw new InvalidMoveException("Occupied target position");}
 
         ChessPiece.PieceType pieceType = movingPiece.getPieceType();
-        TeamColor team = movingPiece.getTeamColor();
 
-        ChessPiece capturedPiece = gameBoard.getPiece(move.getEndPosition());
-
-        MoveRecord newMove = new MoveRecord(move, pieceType, capturedPiece);
+        MoveRecord newMove = new MoveRecord(move, pieceType, occupant);
         gameBoard.movePiece(move);
         turn = turn.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE ;
         if (pieceType.equals(ChessPiece.PieceType.KING)) {setKingPosition(team, move.getEndPosition());}
@@ -216,6 +217,16 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         gameBoard = new ChessBoard(board);
+        for (ChessPosition position : board.getOccupiedPositions()) {
+            ChessPiece occupant = gameBoard.getPiece(position);
+            if (occupant.getPieceType().equals(ChessPiece.PieceType.KING)) {
+                if (occupant.getTeamColor().equals(TeamColor.WHITE)) {
+                    whiteKingPosition = position;
+                } else {
+                    blackKingPosition = position;
+                }
+            }
+        }
     }
 
     /**
