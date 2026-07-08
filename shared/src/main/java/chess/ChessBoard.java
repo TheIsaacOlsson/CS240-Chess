@@ -19,6 +19,12 @@ public class ChessBoard {
 
     }
 
+    public ChessBoard(ChessBoard copy) {
+        for (ChessPosition position : copy.getOccupiedPositions()) {
+            this.addPiece(position, copy.getPiece(position));
+        }
+    }
+
     /**
      * Returns the set of occupied positions
      */

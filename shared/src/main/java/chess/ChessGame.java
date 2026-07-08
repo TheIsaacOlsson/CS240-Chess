@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -24,6 +25,13 @@ public class ChessGame {
         blackKingPosition = new ChessPosition(8, 5);
     }
 
+    public ChessGame(ChessGame game) {
+        this.turn = game.getTeamTurn();
+        setBoard(game.getBoard());
+        this.whiteKingPosition = game.getKingPosition(TeamColor.WHITE);
+        this.blackKingPosition = game.getKingPosition(TeamColor.BLACK);
+    }
+
     /**
      * @return Which team's turn it is
      */
@@ -38,6 +46,18 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         turn = team;
+    }
+
+    public ChessPosition getKingPosition(TeamColor color) {
+        return color.equals(TeamColor.WHITE) ? whiteKingPosition : blackKingPosition;
+    }
+
+    public void setKingPosition(TeamColor color, ChessPosition newPosition) {
+        if (color.equals(TeamColor.WHITE)) {
+            whiteKingPosition = newPosition;
+        } else {
+            blackKingPosition = newPosition;
+        }
     }
 
     /**
@@ -61,12 +81,14 @@ public class ChessGame {
         Collection<ChessMove> providedMoves = piece.pieceMoves(gameBoard, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
 
+        ChessGame sandbox = new ChessGame(this);
+
         for (ChessMove move : providedMoves) {
             try{
-                testMove(move);
+                MoveRecord moveInfo = sandbox.makeMove(move);
 
                 validMoves.add(move);
-
+                sandbox.undoMove(moveInfo);
             } catch (InvalidMoveException e) {
                 System.out.println(e.getMessage());
             }
@@ -80,37 +102,9 @@ public class ChessGame {
      *
      * @param move chess move to perform
      * @throws InvalidMoveException if move is invalid
+     * @return Record of information needed to undo the move
      */
-    public void makeMove(ChessMove move) throws InvalidMoveException {
-        try {
-            testMove(move);
-        } catch (InvalidMoveException moveException) {
-            throw moveException;
-        }
-
-        ChessPiece movingPiece = gameBoard.getPiece(move.getStartPosition());
-        ChessPiece.PieceType pieceType = movingPiece.getPieceType();
-        ChessPiece capturedPiece = gameBoard.getPiece(move.getEndPosition());
-
-        gameBoard.movePiece(move);
-        if (isInCheck(movingPiece.getTeamColor())) {
-            undoMove(move, pieceType, capturedPiece);
-            throw new InvalidMoveException("Cannot willingly put/keep your King in check.");
-        }
-    }
-
-    private void undoMove(ChessMove move, ChessPiece.PieceType originalType, ChessPiece capturedPiece) {
-        gameBoard.movePiece(new ChessMove(move.getEndPosition(), move.getStartPosition(), originalType));
-        gameBoard.addPiece(move.getEndPosition(), capturedPiece);
-    }
-
-    /**
-     * Checks if a move is valid.
-     *
-     * @param move The move being checked
-     * @throws InvalidMoveException when the given move cannot/should not be completed
-     */
-    private void testMove(ChessMove move) throws InvalidMoveException {
+    public MoveRecord makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startSquare = move.getStartPosition();
         ChessPiece movingPiece = gameBoard.getPiece(startSquare);
         if (movingPiece == null) {throw new InvalidMoveException("No piece at start position");}
@@ -120,7 +114,44 @@ public class ChessGame {
 
         ChessPosition targetSquare = move.getEndPosition();
         ChessPiece occupant = gameBoard.getPiece(targetSquare);
-        if (movingPiece.getTeamColor().equals(occupant.getTeamColor())) {throw new InvalidMoveException("Occupied target position");}
+        if (occupant!=null && movingPiece.getTeamColor().equals(occupant.getTeamColor())) {throw new InvalidMoveException("Occupied target position");}
+
+        ChessPiece.PieceType pieceType = movingPiece.getPieceType();
+        TeamColor team = movingPiece.getTeamColor();
+
+        ChessPiece capturedPiece = gameBoard.getPiece(move.getEndPosition());
+
+        MoveRecord newMove = new MoveRecord(move, pieceType, capturedPiece);
+        gameBoard.movePiece(move);
+        turn = turn.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE ;
+
+        if (isInCheck(team)) {
+            undoMove(newMove);
+            throw new InvalidMoveException("Cannot willingly put/keep your King in check.");
+        } else {
+            if (pieceType.equals(ChessPiece.PieceType.KING)) {setKingPosition(team, move.getEndPosition());}
+            return newMove;
+        }
+    }
+
+    /**
+     * Records the information needed to fully undo a move and restore pieces
+     *
+     * @param move The move that was made
+     * @param originalType The type of piece it was before the move
+     * @param capturedPiece The piece that was captured during the move
+     */
+    record MoveRecord(ChessMove move, ChessPiece.PieceType originalType, ChessPiece capturedPiece) {}
+
+    /**
+     * Reverses the changes caused by a move. Returns the piece to its original location and restores captured pieces.
+     *
+     * @param moveInfo Record object with the move to undo, original piece type, and the piece that was captured.
+     */
+    private void undoMove(MoveRecord moveInfo) {
+        gameBoard.movePiece(new ChessMove(moveInfo.move.getEndPosition(), moveInfo.move.getStartPosition(), moveInfo.originalType));
+        gameBoard.addPiece(moveInfo.move.getEndPosition(), moveInfo.capturedPiece);
+        turn = turn.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE ;
     }
 
     /**
@@ -183,7 +214,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        gameBoard = new ChessBoard(board);
     }
 
     /**
@@ -193,5 +224,19 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return gameBoard;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return turn == chessGame.turn && Objects.equals(gameBoard, chessGame.gameBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(turn, gameBoard);
     }
 }
