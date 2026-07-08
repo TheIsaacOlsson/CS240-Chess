@@ -124,12 +124,12 @@ public class ChessGame {
         MoveRecord newMove = new MoveRecord(move, pieceType, capturedPiece);
         gameBoard.movePiece(move);
         turn = turn.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE ;
+        if (pieceType.equals(ChessPiece.PieceType.KING)) {setKingPosition(team, move.getEndPosition());}
 
         if (isInCheck(team)) {
             undoMove(newMove);
             throw new InvalidMoveException("Cannot willingly put/keep your King in check.");
         } else {
-            if (pieceType.equals(ChessPiece.PieceType.KING)) {setKingPosition(team, move.getEndPosition());}
             return newMove;
         }
     }
@@ -150,8 +150,9 @@ public class ChessGame {
      */
     private void undoMove(MoveRecord moveInfo) {
         gameBoard.movePiece(new ChessMove(moveInfo.move.getEndPosition(), moveInfo.move.getStartPosition(), moveInfo.originalType));
-        gameBoard.addPiece(moveInfo.move.getEndPosition(), moveInfo.capturedPiece);
+        if (moveInfo.capturedPiece != null) {gameBoard.addPiece(moveInfo.move.getEndPosition(), moveInfo.capturedPiece);}
         turn = turn.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE ;
+        if (moveInfo.originalType.equals(ChessPiece.PieceType.KING)) {setKingPosition(turn, moveInfo.move.getStartPosition());}
     }
 
     /**

@@ -119,6 +119,36 @@ public class ChessBoard {
     }
 
     @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (ChessPiece[] row : squares) {
+            for (ChessPiece piece : row) {
+                builder.append('|');
+                if (piece==null) {
+                    builder.append(' ');
+                } else {
+                    builder.append(piece);
+                }
+            }
+            builder.append("|\n");
+        }
+
+        for (int i=1; i <= 8 ; i++) {
+            for (int j=1; j <= 8 ; j++) {
+                builder.append('|');
+                if (occupiedPositions.contains(new ChessPosition(i, j))) {
+                    builder.append('x');
+                } else {
+                    builder.append(' ');
+                }
+            }
+            builder.append("|\n");
+        }
+
+        return builder.toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
