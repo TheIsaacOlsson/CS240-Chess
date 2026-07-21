@@ -1,7 +1,7 @@
 package server;
 
 import io.javalin.*;
-import server.Handlers.Register;
+import server.Handlers.RegisterHandler;
 
 public class Server {
 
@@ -9,7 +9,7 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
-        .post("/user", context -> new Register().tryRegister(context));
+        .post("/user", context -> new RegisterHandler().tryRegister(context));
         // Register your endpoints and exception handlers here.
 
     }
