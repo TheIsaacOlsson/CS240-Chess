@@ -1,3 +1,5 @@
 package server.RequestResponse;
 
-public record RegisterRequest(String username, String password, String email) {}
+import dataaccess.UserData;
+
+public record RegisterRequest(UserData user) {}
