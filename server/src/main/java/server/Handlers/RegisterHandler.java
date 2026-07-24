@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import dataaccess.AuthData;
 import dataaccess.UserData;
 import io.javalin.http.Context;
-import server.RequestResponse.RegisterRequest;
 import server.RequestResponse.RegisterResponse;
 import server.Services.RegisterService;
 
-public class RegisterHandler implements Handler {
+public class RegisterHandler {
     public void tryRegister(Context registration) {
         var registerReq = new Gson().fromJson(registration.body(), UserData.class);
         AuthData newAuth = RegisterService.register(registerReq);
