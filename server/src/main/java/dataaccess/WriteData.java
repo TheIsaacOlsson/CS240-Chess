@@ -1,5 +1,6 @@
 package dataaccess;
 
 public interface WriteData {
-    void addUser(UserData newUser);
+    static void addUser(UserData newUser) {}
+    static void addAuth(AuthData newAuth) {}
 }

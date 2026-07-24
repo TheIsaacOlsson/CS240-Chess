@@ -11,8 +11,9 @@ public class RegisterService {
         if(ValidateService.exists(registration.username())) {
             return null;
         }
-        new MemoryWriteData().addUser(registration);
-        //Add and return new authData
-        return new AuthData("0", registration.username());
+        MemoryWriteData.addUser(registration);
+        AuthData newAuth = AuthService.makeAuthData(registration.username());
+        MemoryWriteData.addAuth(newAuth);
+        return newAuth;
     }
 }

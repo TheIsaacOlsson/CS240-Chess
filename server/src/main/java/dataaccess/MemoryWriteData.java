@@ -1,7 +1,11 @@
 package dataaccess;
 
 public class MemoryWriteData implements WriteData {
-    public void addUser(UserData newUser) {
+    public static void addUser(UserData newUser) {
         Database.addUser(newUser);
+    }
+
+    public static void addAuth(AuthData newAuth) {
+        Database.addAuth(newAuth);
     }
 }
