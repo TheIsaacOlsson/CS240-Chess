@@ -1,5 +1,5 @@
 package dataaccess;
 
 public interface FetchData {
-    void getUser(String username);
+    UserData getUser(String username);
 }

@@ -1,11 +1,18 @@
 package server.Services;
 
 
+import dataaccess.AuthData;
 import dataaccess.MemoryFetchData;
-import server.RequestResponse.RegisterRequest;
+import dataaccess.MemoryWriteData;
+import dataaccess.UserData;
 
 public class RegisterService {
-    public void register(RegisterRequest registration) {
-        new MemoryFetchData().getUser(registration.username());
+    public static AuthData register(UserData registration) {
+        if(ValidateService.exists(registration.username())) {
+            return null;
+        }
+        new MemoryWriteData().addUser(registration);
+        //Add and return new authData
+        return new AuthData("0", registration.username());
     }
 }

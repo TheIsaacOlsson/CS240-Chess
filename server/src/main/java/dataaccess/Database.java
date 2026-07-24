@@ -2,25 +2,27 @@ package dataaccess;
 
 import chess.ChessGame;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Database {
-    private static Set<UserData> users = new HashSet<>();
-    private static Set<AuthData> currentAuth = new HashSet<>();
-    private static Set<GameData> games = new HashSet<>();
+    private static Map<String, UserData> users = new HashMap<>();
+    private static Map<String, AuthData> currentAuth = new HashMap<>();
+    private static Map<Integer, GameData> games = new HashMap<>();
 
     public Database() {}
 
-    public static Set<UserData> getUsers() {
+    public static Map<String, UserData> getUsers() {
         return users;
     }
 
-    public static Set<AuthData> getCurrentAuth() {
+    public static Map<String, AuthData> getCurrentAuth() {
         return currentAuth;
     }
 
-    public static Set<GameData> getGames() {
+    public static Map<Integer, GameData> getGames() {
         return games;
     }
 
@@ -31,14 +33,14 @@ public class Database {
     }
 
     public static void addUser(UserData user) {
-        users.add(user);
+        users.put(user.username(), user);
     }
 
     public static void addAuth(AuthData auth) {
-        currentAuth.add(auth);
+        currentAuth.put(auth.authToken(), auth);
     }
 
     public static void addGame(GameData game) {
-        games.add(game);
+        games.put(game.getGameID(), game);
     }
 }
