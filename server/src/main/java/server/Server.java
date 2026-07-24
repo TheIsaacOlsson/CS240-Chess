@@ -3,6 +3,7 @@ package server;
 import io.javalin.*;
 import server.Handlers.ClearDataHandler;
 import server.Handlers.LoginHandler;
+import server.Handlers.LogoutHandler;
 import server.Handlers.RegisterHandler;
 
 public class Server {
@@ -13,7 +14,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         .post("/user", RegisterHandler::tryRegister)
         .delete("/db", ClearDataHandler::clearData)
-        .post("/session", LoginHandler::tryLogin);
+        .post("/session", LoginHandler::tryLogin)
+        .delete("/session", LogoutHandler::tryLogout);
         // Register your endpoints and exception handlers here.
 
     }

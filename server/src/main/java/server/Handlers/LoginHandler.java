@@ -2,11 +2,9 @@ package server.Handlers;
 
 import com.google.gson.Gson;
 import dataaccess.AuthData;
-import dataaccess.UserData;
 import io.javalin.http.Context;
 import server.RequestResponse.LoginRequest;
 import server.RequestResponse.LoginResponse;
-import server.RequestResponse.RegisterResponse;
 import server.Services.LoginService;
 
 public class LoginHandler {
