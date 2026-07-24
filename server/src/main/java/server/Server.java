@@ -1,10 +1,7 @@
 package server;
 
 import io.javalin.*;
-import server.Handlers.ClearDataHandler;
-import server.Handlers.LoginHandler;
-import server.Handlers.LogoutHandler;
-import server.Handlers.RegisterHandler;
+import server.Handlers.*;
 
 public class Server {
 
@@ -15,7 +12,8 @@ public class Server {
         .post("/user", RegisterHandler::tryRegister)
         .delete("/db", ClearDataHandler::clearData)
         .post("/session", LoginHandler::tryLogin)
-        .delete("/session", LogoutHandler::tryLogout);
+        .delete("/session", LogoutHandler::tryLogout)
+        .get("/game", GetGamesHandler::getGames);
         // Register your endpoints and exception handlers here.
 
     }
