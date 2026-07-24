@@ -8,7 +8,7 @@ import server.RequestResponse.RegisterResponse;
 import server.Services.RegisterService;
 
 public class RegisterHandler {
-    public void tryRegister(Context registration) {
+    public static void tryRegister(Context registration) {
         var registerReq = new Gson().fromJson(registration.body(), UserData.class);
         if (registerReq.username() == null || registerReq.password() == null || registerReq.email() == null) {
             registration.contentType("application/json");

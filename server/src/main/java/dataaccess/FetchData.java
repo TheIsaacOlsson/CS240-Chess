@@ -1,5 +1,5 @@
 package dataaccess;
 
 public interface FetchData {
-    UserData getUser(String username);
+    static UserData getUser(String username) {return null;}
 }

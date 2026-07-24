@@ -12,8 +12,6 @@ public class RegisterService {
             return null;
         }
         MemoryWriteData.addUser(registration);
-        AuthData newAuth = AuthService.makeAuthData(registration.username());
-        MemoryWriteData.addAuth(newAuth);
-        return newAuth;
+        return AuthService.makeAuthData(registration.username());
     }
 }
