@@ -13,7 +13,8 @@ public class Server {
         .delete("/db", ClearDataHandler::clearData)
         .post("/session", LoginHandler::tryLogin)
         .delete("/session", LogoutHandler::tryLogout)
-        .get("/game", GetGamesHandler::getGames);
+        .get("/game", GetGamesHandler::getGames)
+        .post("/game", CreateGameHandler::tryCreateGame);
         // Register your endpoints and exception handlers here.
 
     }

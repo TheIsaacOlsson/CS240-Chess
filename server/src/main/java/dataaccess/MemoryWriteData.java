@@ -9,9 +9,9 @@ public class MemoryWriteData implements WriteData {
         Database.addAuth(newAuth);
     }
 
+    public static void addGame(GameData newGame) {Database.addGame(newGame);}
+
     public static void deleteAuth(String authToken) {Database.getCurrentAuth().remove(authToken);}
 
-    public static void clearDatabase() {
-        Database.clear();
-    }
+    public static void clearDatabase() {Database.clear();}
 }

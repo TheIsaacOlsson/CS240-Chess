@@ -2,7 +2,6 @@ package server.Handlers;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
-import server.RequestResponse.AbbrGameData;
 import server.RequestResponse.GetGamesResponse;
 import server.Services.GetGamesService;
 import server.Services.ValidateService;
