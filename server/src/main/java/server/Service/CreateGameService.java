@@ -1,4 +1,4 @@
-package server.Services;
+package server.Service;
 
 import dataaccess.GameData;
 import dataaccess.MemoryWriteData;

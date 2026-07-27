@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import server.RequestResponse.CreateGameRequest;
 import server.RequestResponse.CreateGameResponse;
-import server.RequestResponse.GetGamesResponse;
-import server.Services.CreateGameService;
-import server.Services.ValidateService;
+import server.Service.CreateGameService;
+import server.Service.ValidateService;
 
 import java.util.Objects;
 

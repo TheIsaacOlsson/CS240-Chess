@@ -4,11 +4,9 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import server.RequestResponse.JoinRequest;
 import server.RequestResponse.JoinResponse;
-import server.Services.ColorTakenException;
-import server.Services.JoinGameService;
-import server.Services.ValidateService;
-
-import java.awt.*;
+import server.Service.ColorTakenException;
+import server.Service.JoinGameService;
+import server.Service.ValidateService;
 
 public class JoinGameHandler {
     public static void tryJoin(Context ctx) {

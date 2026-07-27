@@ -5,7 +5,7 @@ import dataaccess.AuthData;
 import dataaccess.UserData;
 import io.javalin.http.Context;
 import server.RequestResponse.RegisterResponse;
-import server.Services.RegisterService;
+import server.Service.RegisterService;
 
 public class RegisterHandler {
     public static void tryRegister(Context registration) {

@@ -5,7 +5,7 @@ import dataaccess.AuthData;
 import io.javalin.http.Context;
 import server.RequestResponse.LoginRequest;
 import server.RequestResponse.LoginResponse;
-import server.Services.LoginService;
+import server.Service.LoginService;
 
 public class LoginHandler {
     public static void tryLogin(Context ctx) {

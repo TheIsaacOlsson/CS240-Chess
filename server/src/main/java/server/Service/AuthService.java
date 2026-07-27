@@ -1,4 +1,4 @@
-package server.Services;
+package server.Service;
 
 import dataaccess.AuthData;
 import dataaccess.MemoryWriteData;

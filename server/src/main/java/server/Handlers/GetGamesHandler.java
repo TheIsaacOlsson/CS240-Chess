@@ -3,8 +3,8 @@ package server.Handlers;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import server.RequestResponse.GetGamesResponse;
-import server.Services.GetGamesService;
-import server.Services.ValidateService;
+import server.Service.GetGamesService;
+import server.Service.ValidateService;
 
 public class GetGamesHandler {
     public static void getGames(Context ctx) {

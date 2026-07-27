@@ -1,7 +1,7 @@
 package server.Handlers;
 
 import io.javalin.http.Context;
-import server.Services.ClearDatabaseService;
+import server.Service.ClearDatabaseService;
 
 public class ClearDataHandler {
     public static void clearData (Context ctx) {

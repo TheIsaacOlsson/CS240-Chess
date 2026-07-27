@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import server.RequestResponse.LogoutResponse;
-import server.Services.LogoutService;
+import server.Service.LogoutService;
 
 public class LogoutHandler {
     public static void tryLogout(Context ctx) {

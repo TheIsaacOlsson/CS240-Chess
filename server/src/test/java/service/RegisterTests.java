@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import server.Services.RegisterService;
+import server.Service.RegisterService;
 
 public class RegisterTests {
     @Test
