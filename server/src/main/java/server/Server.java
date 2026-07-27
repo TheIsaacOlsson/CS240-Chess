@@ -14,7 +14,8 @@ public class Server {
         .post("/session", LoginHandler::tryLogin)
         .delete("/session", LogoutHandler::tryLogout)
         .get("/game", GetGamesHandler::getGames)
-        .post("/game", CreateGameHandler::tryCreateGame);
+        .post("/game", CreateGameHandler::tryCreateGame)
+        .put("/game", JoinGameHandler::tryJoin);
         // Register your endpoints and exception handlers here.
 
     }

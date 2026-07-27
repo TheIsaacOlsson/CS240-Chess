@@ -17,6 +17,14 @@ public class GameData {
         this.gameID = generateID();
     }
 
+    public String getWhiteUsername() {
+        return whiteUsername;
+    }
+
+    public String getBlackUsername() {
+        return blackUsername;
+    }
+
     private Integer generateID() {
         while (MemoryFetchData.getGames().containsKey(nextID)) {
             if(nextID == 9999) {nextID=1;} else {nextID++;}
@@ -29,10 +37,6 @@ public class GameData {
     }
 
     public AbbrGameData abbreviate() {
-        return new AbbrGameData(this.getGameID(), nonNull(this.whiteUsername), nonNull(this.blackUsername), this.gameName);
-    }
-
-    private static String nonNull(String name) {
-        return name == null ? "none" : name;
+        return new AbbrGameData(this.getGameID(), this.whiteUsername, this.blackUsername, this.gameName);
     }
 }
