@@ -1,18 +1,14 @@
 package dataaccess;
 
-import chess.ChessGame;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class Database {
+public class MemoryDatabase {
     private static Map<String, UserData> users = new HashMap<>();
     private static Map<String, AuthData> currentAuth = new HashMap<>();
     private static Map<Integer, GameData> games = new HashMap<>();
 
-    public Database() {}
+    public MemoryDatabase() {}
 
     public static Map<String, UserData> getUsers() {
         return users;

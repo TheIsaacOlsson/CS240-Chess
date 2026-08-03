@@ -1,7 +1,7 @@
 package service;
 
 import dataaccess.AuthData;
-import dataaccess.Database;
+import dataaccess.MemoryDatabase;
 import dataaccess.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -16,12 +16,12 @@ public class RegisterTests {
     public void registrationSuccess() {
         UserData newUser = new UserData("my_username", "my_password", "my_email@email.git");
         AuthData newUserAuth = RegisterService.register(newUser);
-        Assertions.assertFalse(Database.getUsers().isEmpty(), "Database is empty");
-        Assertions.assertTrue(Database.getUsers().containsKey("my_username"), "Username not found");
+        Assertions.assertFalse(MemoryDatabase.getUsers().isEmpty(), "Database is empty");
+        Assertions.assertTrue(MemoryDatabase.getUsers().containsKey("my_username"), "Username not found");
 
         Assertions.assertNotNull(newUserAuth);
-        Assertions.assertFalse(Database.getCurrentAuth().isEmpty(), "No AuthData saved");
-        Assertions.assertTrue(Database.getCurrentAuth().containsKey(newUserAuth.authToken()));
+        Assertions.assertFalse(MemoryDatabase.getCurrentAuth().isEmpty(), "No AuthData saved");
+        Assertions.assertTrue(MemoryDatabase.getCurrentAuth().containsKey(newUserAuth.authToken()));
     }
 
     @Test
@@ -35,6 +35,6 @@ public class RegisterTests {
         AuthData secondUserAuth = RegisterService.register(userTwo);
 
         Assertions.assertNull(secondUserAuth);
-        Assertions.assertTrue(Database.getUsers().containsValue(userOne));
+        Assertions.assertTrue(MemoryDatabase.getUsers().containsValue(userOne));
     }
 }
