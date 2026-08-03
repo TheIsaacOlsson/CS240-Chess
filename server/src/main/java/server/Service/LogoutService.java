@@ -1,6 +1,7 @@
 package server.Service;
 
 import dataaccess.DataAccessException;
+import dataaccess.Database;
 import dataaccess.MemoryWriteData;
 
 public class LogoutService {
@@ -8,7 +9,7 @@ public class LogoutService {
         if ( ! ValidateService.isAuthorized(authToken)) {
             throw new DataAccessException("Error: unauthorized");
         } else {
-            MemoryWriteData.deleteAuth(authToken);
+            Database.WriteData.deleteAuth(authToken);
         }
     }
 }

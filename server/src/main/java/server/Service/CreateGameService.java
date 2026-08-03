@@ -1,12 +1,13 @@
 package server.Service;
 
+import dataaccess.Database;
 import dataaccess.GameData;
 import dataaccess.MemoryWriteData;
 
 public class CreateGameService {
     public static Integer makeGame(String gameName) {
         GameData newGame = new GameData(gameName);
-        MemoryWriteData.addGame(newGame);
+        Database.WriteData.addGame(newGame);
         return newGame.getGameID();
     }
 }

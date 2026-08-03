@@ -3,18 +3,19 @@ package dataaccess;
 import server.RequestResponse.JoinRequest;
 
 public class MemoryWriteData implements WriteData {
-    public static void addUser(UserData newUser) {
+    public void addUser(UserData newUser) {
         MemoryDatabase.addUser(newUser);
     }
 
-    public static void addAuth(AuthData newAuth) {
+    public void addAuth(AuthData newAuth) {
         MemoryDatabase.addAuth(newAuth);
     }
 
-    public static void addGame(GameData newGame) {
-        MemoryDatabase.addGame(newGame);}
+    public void addGame(GameData newGame) {
+        MemoryDatabase.addGame(newGame);
+    }
 
-    public static void addToGame(JoinRequest request, String username) {
+    public void addToGame(JoinRequest request, String username) {
         GameData requestedGame = MemoryDatabase.getGames().get(request.gameID());
         switch (request.playerColor()) {
             case "WHITE" -> requestedGame.whiteUsername = username;
@@ -22,9 +23,9 @@ public class MemoryWriteData implements WriteData {
         }
     }
 
-    public static void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) {
         MemoryDatabase.getCurrentAuth().remove(authToken);}
 
-    public static void clearDatabase() {
+    public void clearDatabase() {
         MemoryDatabase.clear();}
 }
