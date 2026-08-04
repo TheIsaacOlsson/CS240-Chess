@@ -2,7 +2,9 @@ package dataaccess;
 
 import server.RequestResponse.JoinRequest;
 
-public class MemoryWriteData implements WriteData {
+import java.util.Map;
+
+public class MemoryAccessData implements AccessData {
     public void addUser(UserData newUser) {
         MemoryDatabase.addUser(newUser);
     }
@@ -14,6 +16,14 @@ public class MemoryWriteData implements WriteData {
     public void addGame(GameData newGame) {
         MemoryDatabase.addGame(newGame);
     }
+
+    public UserData getUser(String username) {
+        return MemoryDatabase.getUsers().get(username);
+    }
+
+    public AuthData getAuthData(String authToken) {return MemoryDatabase.getCurrentAuth().get(authToken);}
+
+    public Map<Integer, GameData> getGames() {return MemoryDatabase.getGames();}
 
     public void addToGame(JoinRequest request, String username) {
         GameData requestedGame = MemoryDatabase.getGames().get(request.gameID());

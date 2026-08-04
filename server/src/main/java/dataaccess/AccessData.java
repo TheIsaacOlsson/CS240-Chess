@@ -2,7 +2,12 @@ package dataaccess;
 
 import server.RequestResponse.JoinRequest;
 
-public interface WriteData {
+import java.util.Map;
+
+public interface AccessData {
+    UserData getUser(String username);
+    AuthData getAuthData(String authToken);
+    Map<Integer, GameData> getGames();
     void addUser(UserData newUser);
     void addAuth(AuthData newAuth);
     void addGame(GameData newGame);

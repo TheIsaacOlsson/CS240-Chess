@@ -2,7 +2,6 @@ package server.Service;
 
 import dataaccess.AuthData;
 import dataaccess.Database;
-import dataaccess.MemoryWriteData;
 
 import java.util.UUID;
 
@@ -10,7 +9,7 @@ public class AuthService {
     public static AuthData makeAuthData(String username) {
         String token = generateAuthToken();
         AuthData newAuth = new AuthData(token, username);
-        Database.WriteData.addAuth(newAuth);
+        Database.DataAccess.addAuth(newAuth);
         return newAuth;
     }
 

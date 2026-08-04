@@ -8,12 +8,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
-public class SQLWriteData implements WriteData{
-    public SQLWriteData() throws DataAccessException {
+public class SQLAccessData implements AccessData {
+    public SQLAccessData() throws DataAccessException {
         configureDatabase();
     }
 
@@ -43,6 +44,14 @@ public class SQLWriteData implements WriteData{
             System.out.printf("Unable to add authorization: %s", e.getMessage());
         }
     }
+
+    public UserData getUser(String username) {
+        return null;
+    }
+
+    public AuthData getAuthData(String authToken) {return null;}
+
+    public Map<Integer, GameData> getGames() {return null;}
 
     public void addToGame(JoinRequest request, String username) {}
 

@@ -11,19 +11,12 @@ public class Database {
     }
     private final static type databaseType = type.SQL;
 
-    public static FetchData FetchData;
-    public static WriteData WriteData;
+    public static AccessData DataAccess;
 
     public Database() throws DataAccessException {
         switch (databaseType) {
-            case MEMORY -> {
-                WriteData = new MemoryWriteData();
-                FetchData = new MemoryFetchData();
-            }
-            case SQL -> {
-                WriteData = new SQLWriteData();
-                FetchData = new SQLFetchData();
-            }
+            case MEMORY -> DataAccess = new MemoryAccessData();
+            case SQL -> DataAccess = new SQLAccessData();
         }
     }
 }

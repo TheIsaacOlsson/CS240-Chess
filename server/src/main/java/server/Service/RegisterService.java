@@ -3,7 +3,6 @@ package server.Service;
 
 import dataaccess.AuthData;
 import dataaccess.Database;
-import dataaccess.MemoryWriteData;
 import dataaccess.UserData;
 
 public class RegisterService {
@@ -11,7 +10,7 @@ public class RegisterService {
         if(ValidateService.isUser(registration.username())) {
             return null;
         }
-        Database.WriteData.addUser(registration);
+        Database.DataAccess.addUser(registration);
         return AuthService.makeAuthData(registration.username());
     }
 }
