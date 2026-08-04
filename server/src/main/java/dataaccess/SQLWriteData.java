@@ -17,11 +17,37 @@ public class SQLWriteData implements WriteData{
         configureDatabase();
     }
 
-    public void addUser(UserData newUser) {}
-    public void addAuth(AuthData newAuth) {}
-    public void addGame(GameData newGame) {}
+    public void addUser(UserData newUser) {
+        var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
+        try {
+            executeUpdate(statement, newUser.username(), newUser.password(), newUser.email());
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to add user: %s", e.getMessage());
+        }
+    }
+
+    public void addAuth(AuthData newAuth) {
+        var statement = "INSERT INTO authData (authToken, username) VALUES (?, ?)";
+        try {
+            executeUpdate(statement, newAuth.authToken(), newAuth.username());
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to add authorization: %s", e.getMessage());
+        }
+    }
+
+    public void addGame(GameData newGame) {
+        var statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
+        try {
+            executeUpdate(statement, newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game);
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to add authorization: %s", e.getMessage());
+        }
+    }
+
     public void addToGame(JoinRequest request, String username) {}
+
     public void deleteAuth(String authToken) {}
+
     public void clearDatabase() {}
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -29,10 +55,14 @@ public class SQLWriteData implements WriteData{
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof ChessGame p) ps.setString(i + 1, new Gson().toJson(p));
-                    else if (param == null) ps.setNull(i + 1, NULL);
+                    switch (param) {
+                        case String p -> ps.setString(i + 1, p);
+                        case Integer p -> ps.setInt(i + 1, p);
+                        case ChessGame p -> ps.setString(i + 1, new Gson().toJson(p));
+                        case null -> ps.setNull(i + 1, NULL);
+                        default -> {
+                        }
+                    }
                 }
                 ps.executeUpdate();
 
