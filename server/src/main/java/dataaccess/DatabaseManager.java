@@ -3,7 +3,7 @@ package dataaccess;
 import java.sql.*;
 import java.util.Properties;
 
-public class SQLDatabaseManager {
+public class DatabaseManager {
     private static String databaseName;
     private static String dbUsername;
     private static String dbPassword;
@@ -19,13 +19,13 @@ public class SQLDatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static public void createDatabase() throws DataAccessException {
+    static public void createDatabase() throws ConnectionException {
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
-            throw new DataAccessException("failed to create database", ex);
+            throw new ConnectionException("failed to create database", ex);
         }
     }
 
@@ -41,14 +41,14 @@ public class SQLDatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    static Connection getConnection() throws ConnectionException {
         try {
             //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
             conn.setCatalog(databaseName);
             return conn;
         } catch (SQLException ex) {
-            throw new DataAccessException("failed to get connection", ex);
+            throw new ConnectionException("failed to get connection", ex);
         }
     }
 

@@ -1,6 +1,6 @@
 package server;
 
-import dataaccess.DataAccessException;
+import dataaccess.ConnectionException;
 import dataaccess.Database;
 import io.javalin.*;
 import server.Handlers.*;
@@ -27,7 +27,7 @@ public class Server {
 
         try {
             new Database();
-        } catch (DataAccessException e) {
+        } catch (ConnectionException e) {
             throw new RuntimeException(String.format("Database configuration failed: %s", e.getMessage()));
         }
 

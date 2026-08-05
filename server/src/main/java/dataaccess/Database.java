@@ -13,7 +13,7 @@ public class Database {
 
     public static AccessData DataAccess;
 
-    public Database() throws DataAccessException {
+    public Database() throws ConnectionException {
         switch (databaseType) {
             case MEMORY -> DataAccess = new MemoryAccessData();
             case SQL -> DataAccess = new SQLAccessData();

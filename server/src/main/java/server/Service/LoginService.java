@@ -1,11 +1,12 @@
 package server.Service;
 
 import dataaccess.AuthData;
+import dataaccess.ConnectionException;
 import dataaccess.Database;
 import server.RequestResponse.LoginRequest;
 
 public class LoginService {
-    public static AuthData login(LoginRequest login) {
+    public static AuthData login(LoginRequest login) throws ConnectionException {
         if (
                 ! (Database.DataAccess.getUser(login.username()) == null) &&
                 login.password().equals(Database.DataAccess.getUser(login.username()).password())
