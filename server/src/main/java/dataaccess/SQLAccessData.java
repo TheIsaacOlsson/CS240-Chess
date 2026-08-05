@@ -7,6 +7,7 @@ import server.RequestResponse.JoinRequest;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -68,7 +69,23 @@ public class SQLAccessData implements AccessData {
         return null;
     }
 
-    public Map<Integer, GameData> getGames() {return null;}
+    public Map<Integer, GameData> getGames() {
+        var statement = "SELECT FROM gameData";
+        try {
+            String[] desiredData = new String[] {"gameID", "whiteUsername", "blackUsername", "gameName", "game"};
+            ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {}, desiredData);
+            Map<Integer, GameData> allGames = new HashMap<>();
+            for (ArrayList<Object> row : queryResults) {
+                String game = (String) row.get(4);
+                ChessGame gameObject = new Gson().fromJson(game, ChessGame.class);
+                allGames.put( (Integer) row.getFirst(), new GameData( (Integer) row.get(0), (String) row.get(1), (String) row.get(2), (String) row.get(3), gameObject));
+            }
+            return allGames;
+        } catch (DataAccessException e) {
+            System.out.printf("Authorization not found: %s", e.getMessage());
+        }
+        return null;
+    }
 
     public void addToGame(JoinRequest request, String username) {}
 
