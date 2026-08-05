@@ -28,8 +28,8 @@ public class MemoryAccessData implements AccessData {
     public void addToGame(JoinRequest request, String username) {
         GameData requestedGame = MemoryDatabase.getGames().get(request.gameID());
         switch (request.playerColor()) {
-            case "WHITE" -> requestedGame.whiteUsername = username;
-            case "BLACK" -> requestedGame.blackUsername = username;
+            case WHITE -> requestedGame.whiteUsername = username;
+            case BLACK -> requestedGame.blackUsername = username;
         }
     }
 

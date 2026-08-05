@@ -65,6 +65,7 @@ public class SQLAccessData implements AccessData {
         try {
             String[] desiredData = new String[] {"username"};
             ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {authToken}, desiredData);
+            if (queryResults == null) {return null;}
             return new AuthData(authToken, (String) queryResults.getFirst().getFirst());
         } catch (DataAccessException e) {
             System.out.printf("Authorization not found: %s", e.getMessage());
@@ -78,6 +79,7 @@ public class SQLAccessData implements AccessData {
             String[] desiredData = new String[] {"gameID", "whiteUsername", "blackUsername", "gameName", "game"};
             ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {}, desiredData);
             Map<Integer, GameData> allGames = new HashMap<>();
+            if (queryResults == null) {return allGames;}
             for (ArrayList<Object> row : queryResults) {
                 String game = (String) row.get(4);
                 ChessGame gameObject = new Gson().fromJson(game, ChessGame.class);
@@ -101,7 +103,7 @@ public class SQLAccessData implements AccessData {
     }
 
     public void deleteAuth(String authToken) {
-        var statement = "DELETE FROM authData WHERE primaryKey = ?";
+        var statement = "DELETE FROM authData WHERE authToken = ?";
         try {
             executeStatement(statement, new Object[] {authToken}, null);
         } catch (DataAccessException e) {
@@ -110,7 +112,7 @@ public class SQLAccessData implements AccessData {
     }
 
     public void clearDatabase() {
-        String[] tableNames = new String[] {"userData", "gameData", "authData"};
+        String[] tableNames = new String[] {"gameData", "authData", "userData"};
         for (String table : tableNames) {
             try {
                 executeStatement("DELETE FROM " + table, new Object[] {}, null);

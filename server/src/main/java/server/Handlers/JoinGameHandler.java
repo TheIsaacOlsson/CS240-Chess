@@ -1,5 +1,6 @@
 package server.Handlers;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import server.RequestResponse.JoinRequest;
@@ -17,7 +18,8 @@ public class JoinGameHandler {
             ctx.result(new Gson().toJson(new JoinResponse("Error: unauthorized")));
         } else {
             var joinReq = new Gson().fromJson(ctx.body(), JoinRequest.class);
-            if (joinReq.gameID() == null || joinReq.playerColor() == null || joinReq.gameID() <= 0 || joinReq.gameID() > 9999 || ( ! joinReq.playerColor().equals("BLACK") && ! joinReq.playerColor().equals("WHITE"))) {
+            if (joinReq.gameID() == null || joinReq.playerColor() == null
+                    || joinReq.gameID() <= 0 || joinReq.gameID() > 9999) {
                 ctx.contentType("application/json");
                 ctx.status(400);
                 ctx.result(new Gson().toJson(new JoinResponse("Error: bad request")));
