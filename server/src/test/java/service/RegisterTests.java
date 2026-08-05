@@ -15,26 +15,34 @@ public class RegisterTests {
     @DisplayName("Registration Success")
     public void registrationSuccess() {
         UserData newUser = new UserData("my_username", "my_password", "my_email@email.git");
-        AuthData newUserAuth = RegisterService.register(newUser);
-        Assertions.assertFalse(MemoryDatabase.getUsers().isEmpty(), "Database is empty");
-        Assertions.assertTrue(MemoryDatabase.getUsers().containsKey("my_username"), "Username not found");
+        try {
+            AuthData newUserAuth = RegisterService.register(newUser);
+            Assertions.assertFalse(MemoryDatabase.getUsers().isEmpty(), "Database is empty");
+            Assertions.assertTrue(MemoryDatabase.getUsers().containsKey("my_username"), "Username not found");
 
-        Assertions.assertNotNull(newUserAuth);
-        Assertions.assertFalse(MemoryDatabase.getCurrentAuth().isEmpty(), "No AuthData saved");
-        Assertions.assertTrue(MemoryDatabase.getCurrentAuth().containsKey(newUserAuth.authToken()));
+            Assertions.assertNotNull(newUserAuth);
+            Assertions.assertFalse(MemoryDatabase.getCurrentAuth().isEmpty(), "No AuthData saved");
+            Assertions.assertTrue(MemoryDatabase.getCurrentAuth().containsKey(newUserAuth.authToken()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     @Order(2)
     @DisplayName("Username Taken")
     public void usernameTakenFailure() {
-        UserData userOne = new UserData("my_username", "my_password", "my_email@email.git");
-        RegisterService.register(userOne);
+        try {
+            UserData userOne = new UserData("my_username", "my_password", "my_email@email.git");
+            RegisterService.register(userOne);
 
-        UserData userTwo = new UserData("my_username", "new_pass", "different@email.yahoo");
-        AuthData secondUserAuth = RegisterService.register(userTwo);
+            UserData userTwo = new UserData("my_username", "new_pass", "different@email.yahoo");
+            AuthData secondUserAuth = RegisterService.register(userTwo);
 
-        Assertions.assertNull(secondUserAuth);
-        Assertions.assertTrue(MemoryDatabase.getUsers().containsValue(userOne));
+            Assertions.assertNull(secondUserAuth);
+            Assertions.assertTrue(MemoryDatabase.getUsers().containsValue(userOne));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -40,15 +40,18 @@ public class SQLAccessData implements AccessData {
         }
     }
 
-    public void addGame(GameData newGame) throws ConnectionException {
+    public Integer addGame(GameData newGame) throws ConnectionException {
         var statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         try {
-            executeStatement(statement, new Object[] {newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game}, null);
+            ArrayList<ArrayList<Object>> wrappedID;
+            wrappedID = executeStatement(statement, new Object[] {newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game}, null);
+            return (Integer) unwrapObject(wrappedID);
         } catch (ConnectionException e) {
             throw e;
         } catch (DataAccessException e) {
             System.out.printf("Unable to add authorization: %s", e.getMessage());
         }
+        return null;
     }
 
     public UserData getUser(String username) throws ConnectionException {
@@ -209,7 +212,10 @@ public class SQLAccessData implements AccessData {
                                 || statement.startsWith("UPDATE")
                 ) {
                     ps.executeUpdate();
-                    // ResultSet keys = ps.getGeneratedKeys();
+                    ResultSet keys = ps.getGeneratedKeys();
+                    if (keys.next()) {
+                        return wrapObject(keys.getInt(1));
+                    }
                     // return generated keys (if applicable)
                     return null;
                 } else {
@@ -221,6 +227,18 @@ public class SQLAccessData implements AccessData {
         } catch (SQLException e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
+    }
+
+    private ArrayList<ArrayList<Object>> wrapObject(Object input) {
+        ArrayList<ArrayList<Object>> outer = new ArrayList<>();
+        ArrayList<Object> inner = new ArrayList<>();
+        inner.add(input);
+        outer.add(inner);
+        return outer;
+    }
+
+    private Object unwrapObject(ArrayList<ArrayList<Object>> wrappedObject) {
+        return wrappedObject.getFirst().getFirst();
     }
 
     private final String[] createStatements = {

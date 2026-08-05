@@ -11,7 +11,7 @@ public interface AccessData {
     Map<Integer, GameData> getGames() throws ConnectionException;
     void addUser(UserData newUser) throws ConnectionException;
     void addAuth(AuthData newAuth) throws ConnectionException;
-    void addGame(GameData newGame) throws ConnectionException;
+    Integer addGame(GameData newGame) throws ConnectionException;
     void addToGame(JoinRequest request, String username) throws ConnectionException;
     void deleteAuth(String authToken) throws ConnectionException;
     void clearDatabase() throws ConnectionException;

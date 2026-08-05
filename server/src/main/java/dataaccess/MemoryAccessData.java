@@ -13,8 +13,8 @@ public class MemoryAccessData implements AccessData {
         MemoryDatabase.addAuth(newAuth);
     }
 
-    public void addGame(GameData newGame) {
-        MemoryDatabase.addGame(newGame);
+    public Integer addGame(GameData newGame) {
+        return MemoryDatabase.addGame(newGame);
     }
 
     public UserData getUser(String username) {

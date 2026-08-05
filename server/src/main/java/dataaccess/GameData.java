@@ -6,7 +6,7 @@ import server.RequestResponse.AbbrGameData;
 public class GameData {
     private static Integer nextID = 1;
 
-    final Integer gameID;
+    Integer gameID;
     String whiteUsername = null;
     String blackUsername = null;
     String gameName;
@@ -14,7 +14,6 @@ public class GameData {
 
     public GameData(String gameName) {
         this.gameName = gameName;
-        this.gameID = generateID();
     }
 
     public GameData(Integer id, String whiteUsername, String blackUsername, String name, ChessGame game) {
@@ -33,15 +32,12 @@ public class GameData {
         return blackUsername;
     }
 
-    private Integer generateID() {
-        while (Database.DataAccess.getGames().containsKey(nextID)) {
-            if(nextID == 9999) {nextID=1;} else {nextID++;}
-        }
-        return nextID++;
-    }
-
     public int getGameID() {
         return gameID;
+    }
+
+    public void setGameID(int id) {
+        gameID = id;
     }
 
     public AbbrGameData abbreviate() {

@@ -7,6 +7,7 @@ public class MemoryDatabase {
     private static Map<String, UserData> users = new HashMap<>();
     private static Map<String, AuthData> currentAuth = new HashMap<>();
     private static Map<Integer, GameData> games = new HashMap<>();
+    private static Integer nextID = 1;
 
     public MemoryDatabase() {}
 
@@ -36,7 +37,21 @@ public class MemoryDatabase {
         currentAuth.put(auth.authToken(), auth);
     }
 
-    public static void addGame(GameData game) {
+    public static Integer addGame(GameData game) {
+        game.setGameID(generateID());
         games.put(game.getGameID(), game);
+        return game.getGameID();
+    }
+
+    private static Integer generateID() {
+        Map<Integer, GameData> allGames = getGames();
+        while (allGames.containsKey(nextID)) {
+            if (nextID == 9999) {
+                nextID = 1;
+            } else {
+                nextID++;
+            }
+        }
+        return nextID++;
     }
 }

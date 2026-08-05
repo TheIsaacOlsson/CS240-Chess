@@ -30,24 +30,32 @@ public class SQLTests {
     @Order(1)
     @DisplayName("Registration Success")
     public void registrationSuccess() {
-        UserData newUser = new UserData("my_username", "my_password", "my_email@email.git");
-        AuthData newUserAuth = RegisterService.register(newUser);
+        try {
+            UserData newUser = new UserData("my_username", "my_password", "my_email@email.git");
+            AuthData newUserAuth = RegisterService.register(newUser);
 
-        Assertions.assertTrue(ValidateService.isUser(newUser.username())); // Verifies user got made if not already there
-        Assertions.assertNotNull(newUserAuth); // Verifies that user was not already there (Clear database first)
+            Assertions.assertTrue(ValidateService.isUser(newUser.username())); // Verifies user got made if not already there
+            Assertions.assertNotNull(newUserAuth); // Verifies that user was not already there (Clear database first)
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     @Order(2)
     @DisplayName("Username Taken")
     public void usernameTakenFailure() {
-        UserData userOne = new UserData("my_username", "my_password", "my_email@email.git");
-        RegisterService.register(userOne);
+        try {
+            UserData userOne = new UserData("my_username", "my_password", "my_email@email.git");
+            RegisterService.register(userOne);
 
-        UserData userTwo = new UserData("my_username", "new_pass", "different@email.yahoo");
-        AuthData secondUserAuth = RegisterService.register(userTwo);
+            UserData userTwo = new UserData("my_username", "new_pass", "different@email.yahoo");
+            AuthData secondUserAuth = RegisterService.register(userTwo);
 
-        Assertions.assertNull(secondUserAuth);
-        Assertions.assertTrue(ValidateService.isUser(userOne.username()));
+            Assertions.assertNull(secondUserAuth);
+            Assertions.assertTrue(ValidateService.isUser(userOne.username()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
