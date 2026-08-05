@@ -2,12 +2,14 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import org.eclipse.jetty.server.Authentication;
 import server.RequestResponse.JoinRequest;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -21,7 +23,7 @@ public class SQLAccessData implements AccessData {
     public void addUser(UserData newUser) {
         var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
         try {
-            executeUpdate(statement, newUser.username(), newUser.password(), newUser.email());
+            executeStatement(statement, new Object[] {newUser.username(), newUser.password(), newUser.email()}, null);
         } catch (DataAccessException e) {
             System.out.printf("Unable to add user: %s", e.getMessage());
         }
@@ -30,7 +32,7 @@ public class SQLAccessData implements AccessData {
     public void addAuth(AuthData newAuth) {
         var statement = "INSERT INTO authData (authToken, username) VALUES (?, ?)";
         try {
-            executeUpdate(statement, newAuth.authToken(), newAuth.username());
+            executeStatement(statement, new Object[] {newAuth.authToken(), newAuth.username()}, null);
         } catch (DataAccessException e) {
             System.out.printf("Unable to add authorization: %s", e.getMessage());
         }
@@ -39,25 +41,20 @@ public class SQLAccessData implements AccessData {
     public void addGame(GameData newGame) {
         var statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         try {
-            executeUpdate(statement, newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game);
+            executeStatement(statement, new Object[] {newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game}, null);
         } catch (DataAccessException e) {
             System.out.printf("Unable to add authorization: %s", e.getMessage());
         }
     }
 
     public UserData getUser(String username) {
-        try (Connection conn = SQLDatabaseManager.getConnection()) {
-            var statement = "SELECT password, email FROM userData WHERE username=?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, username);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return new UserData(username, rs.getString("password"), rs.getString("email"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.printf("Unable to add authorization: %s", e.getMessage());
+        var statement = "SELECT password, email FROM userData WHERE username=?";
+        try {
+            String[] desiredData = new String[] {"password", "email"};
+            Object[] queryResults = executeStatement(statement, new Object[] {username}, desiredData);
+            return new UserData(username, (String) queryResults[0], (String) queryResults[1]);
+        } catch (DataAccessException e) {
+            System.out.printf("User not found: %s", e.getMessage());
         }
         return null;
     }
@@ -72,7 +69,7 @@ public class SQLAccessData implements AccessData {
 
     public void clearDatabase() {}
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+    private Object[] executeStatement(String statement, Object[] params, String[] outputColumns) throws DataAccessException {
         try (Connection conn = SQLDatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
@@ -90,10 +87,17 @@ public class SQLAccessData implements AccessData {
 
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    if (outputColumns == null) { return new Object[] {rs.getInt(1)}; }
+
+                    int outputCount = outputColumns.length;
+                    Object[] output = new Object[outputCount];
+                    for (int j = 0 ; j < outputCount ; j++) {
+                        output[j] = rs.getObject(outputColumns[j]);
+                    }
+                    return output;
                 }
 
-                return 0;
+                return new Object[] {0};
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
