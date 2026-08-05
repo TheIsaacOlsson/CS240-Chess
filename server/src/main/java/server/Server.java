@@ -24,6 +24,13 @@ public class Server {
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);
+
+        try {
+            new Database();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(String.format("Database configuration failed: %s", e.getMessage()));
+        }
+
         return javalin.port();
     }
 

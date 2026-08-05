@@ -10,8 +10,6 @@ public class ServerMain {
             Server server = new Server();
             server.run(8080);
 
-            new Database();
-
             System.out.println("♕ 240 Chess Server");
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());
