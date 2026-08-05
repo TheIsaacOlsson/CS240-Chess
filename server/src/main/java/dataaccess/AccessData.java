@@ -7,6 +7,7 @@ import java.util.Map;
 public interface AccessData {
     UserData getUser(String username);
     AuthData getAuthData(String authToken);
+    GameData getGameByID(Integer gameID);
     Map<Integer, GameData> getGames();
     void addUser(UserData newUser);
     void addAuth(AuthData newAuth);

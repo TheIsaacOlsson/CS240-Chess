@@ -73,6 +73,22 @@ public class SQLAccessData implements AccessData {
         return null;
     }
 
+    public GameData getGameByID(Integer gameID) {
+        var statement = "SELECT * FROM gameData WHERE gameID = ?";
+        try {
+            String[] desiredData = new String[] {"whiteUsername", "blackUsername", "gameName", "game"};
+            ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {gameID}, desiredData);
+            if (queryResults == null) {return null;}
+            ArrayList<Object> flattenedResults = queryResults.getFirst();
+            String game = (String) flattenedResults.get(3);
+            ChessGame gameObject = new Gson().fromJson(game, ChessGame.class);
+            return new GameData(gameID, (String) flattenedResults.get(0), (String) flattenedResults.get(1), (String) flattenedResults.get(2), gameObject);
+        } catch (DataAccessException e) {
+            System.out.printf("Authorization not found: %s", e.getMessage());
+        }
+        return null;
+    }
+
     public Map<Integer, GameData> getGames() {
         var statement = "SELECT * FROM gameData";
         try {
@@ -120,6 +136,11 @@ public class SQLAccessData implements AccessData {
                 System.out.printf("Unable to clear table: %s", e.getMessage());
             }
         }
+        try {
+            executeStatement("ALTER TABLE gameData AUTO_INCREMENT = 1", new Object[] {}, null);
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to reset increment: %s", e.getMessage());
+        }
     }
 
     private ArrayList<ArrayList<Object>> executeStatement(String statement, Object[] params, String[] outputColumns) throws DataAccessException {
@@ -152,7 +173,12 @@ public class SQLAccessData implements AccessData {
                     }
                     if (i==0) { return null; }
                     else {return output;}
-                } else if (statement.startsWith("INSERT") || statement.startsWith("DELETE")) {
+                } else if (
+                        statement.startsWith("INSERT")
+                        || statement.startsWith("DELETE")
+                        || statement.startsWith("ALTER")
+                        || statement.startsWith("UPDATE")
+                ) {
                     ps.executeUpdate();
                     // ResultSet keys = ps.getGeneratedKeys();
                     // return generated keys (if applicable)

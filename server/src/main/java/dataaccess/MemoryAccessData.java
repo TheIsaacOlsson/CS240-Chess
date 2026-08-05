@@ -23,6 +23,8 @@ public class MemoryAccessData implements AccessData {
 
     public AuthData getAuthData(String authToken) {return MemoryDatabase.getCurrentAuth().get(authToken);}
 
+    public GameData getGameByID(Integer gameID) {return MemoryDatabase.getGames().get(gameID);}
+
     public Map<Integer, GameData> getGames() {return MemoryDatabase.getGames();}
 
     public void addToGame(JoinRequest request, String username) {
