@@ -5,10 +5,7 @@ import com.google.gson.Gson;
 import org.eclipse.jetty.server.Authentication;
 import server.RequestResponse.JoinRequest;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -51,15 +48,25 @@ public class SQLAccessData implements AccessData {
         var statement = "SELECT password, email FROM userData WHERE username=?";
         try {
             String[] desiredData = new String[] {"password", "email"};
-            Object[] queryResults = executeStatement(statement, new Object[] {username}, desiredData);
-            return new UserData(username, (String) queryResults[0], (String) queryResults[1]);
+            ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {username}, desiredData);
+            return new UserData(username, (String) queryResults.getFirst().get(0), (String) queryResults.getFirst().get(1));
         } catch (DataAccessException e) {
             System.out.printf("User not found: %s", e.getMessage());
         }
         return null;
     }
 
-    public AuthData getAuthData(String authToken) {return null;}
+    public AuthData getAuthData(String authToken) {
+        var statement = "SELECT username FROM authData WHERE authToken=?";
+        try {
+            String[] desiredData = new String[] {"username"};
+            ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {authToken}, desiredData);
+            return new AuthData(authToken, (String) queryResults.getFirst().getFirst());
+        } catch (DataAccessException e) {
+            System.out.printf("Authorization not found: %s", e.getMessage());
+        }
+        return null;
+    }
 
     public Map<Integer, GameData> getGames() {return null;}
 
@@ -69,7 +76,7 @@ public class SQLAccessData implements AccessData {
 
     public void clearDatabase() {}
 
-    private Object[] executeStatement(String statement, Object[] params, String[] outputColumns) throws DataAccessException {
+    private ArrayList<ArrayList<Object>> executeStatement(String statement, Object[] params, String[] outputColumns) throws DataAccessException {
         try (Connection conn = SQLDatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
@@ -86,22 +93,31 @@ public class SQLAccessData implements AccessData {
                 ps.executeUpdate();
 
                 ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    if (outputColumns == null) { return new Object[] {rs.getInt(1)}; }
-
-                    int outputCount = outputColumns.length;
-                    Object[] output = new Object[outputCount];
-                    for (int j = 0 ; j < outputCount ; j++) {
-                        output[j] = rs.getObject(outputColumns[j]);
+                int i = 0;
+                ArrayList<ArrayList<Object>> output = new ArrayList<> ();
+                while (rs.next()) {
+                    if (outputColumns == null) { return arrayWrap(1); }
+                    ArrayList<Object> rowData = new ArrayList<>();
+                    for (int j = 0 ; j < outputColumns.length ; j++) {
+                        rowData.add(rs.getObject(j+1));
                     }
-                    return output;
+                    output.add(rowData);
+                    i++;
                 }
-
-                return new Object[] {0};
+                if (i==0) { return arrayWrap(0); }
+                else {return output;}
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
+    }
+
+    private ArrayList<ArrayList<Object>> arrayWrap(Object input) {
+        ArrayList<ArrayList<Object>> outer = new ArrayList<>();
+        ArrayList<Object> inner = new ArrayList<>();
+        inner.add(input);
+        outer.add(inner);
+        return outer;
     }
 
     private final String[] createStatements = {
