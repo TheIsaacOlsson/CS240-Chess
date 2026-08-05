@@ -2,7 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import org.eclipse.jetty.server.Authentication;
 import server.RequestResponse.JoinRequest;
 
 import java.sql.*;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static chess.ChessGame.TeamColor.WHITE;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
@@ -50,6 +50,9 @@ public class SQLAccessData implements AccessData {
         try {
             String[] desiredData = new String[] {"password", "email"};
             ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {username}, desiredData);
+            if (queryResults == null) {
+                return null;
+            }
             return new UserData(username, (String) queryResults.getFirst().get(0), (String) queryResults.getFirst().get(1));
         } catch (DataAccessException e) {
             System.out.printf("User not found: %s", e.getMessage());
@@ -70,7 +73,7 @@ public class SQLAccessData implements AccessData {
     }
 
     public Map<Integer, GameData> getGames() {
-        var statement = "SELECT FROM gameData";
+        var statement = "SELECT * FROM gameData";
         try {
             String[] desiredData = new String[] {"gameID", "whiteUsername", "blackUsername", "gameName", "game"};
             ArrayList<ArrayList<Object>> queryResults = executeStatement(statement, new Object[] {}, desiredData);
@@ -87,11 +90,35 @@ public class SQLAccessData implements AccessData {
         return null;
     }
 
-    public void addToGame(JoinRequest request, String username) {}
+    public void addToGame(JoinRequest request, String username) {
+        var statement = "UPDATE gameData SET ? = ? WHERE id = ?;"; // color = username, id = request.id
+        try {
+            Object[] params = {request.playerColor().equals(WHITE) ? "whiteUsername" : "blackUsername", username, request.gameID()};
+            executeStatement(statement, params, null);
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to add user to game: %s", e.getMessage());
+        }
+    }
 
-    public void deleteAuth(String authToken) {}
+    public void deleteAuth(String authToken) {
+        var statement = "DELETE FROM authData WHERE primaryKey = ?";
+        try {
+            executeStatement(statement, new Object[] {authToken}, null);
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to delete authorization: %s", e.getMessage());
+        }
+    }
 
-    public void clearDatabase() {}
+    public void clearDatabase() {
+        String[] tableNames = new String[] {"userData", "gameData", "authData"};
+        for (String table : tableNames) {
+            try {
+                executeStatement("DELETE FROM " + table, new Object[] {}, null);
+            } catch (DataAccessException e) {
+                System.out.printf("Unable to clear table: %s", e.getMessage());
+            }
+        }
+    }
 
     private ArrayList<ArrayList<Object>> executeStatement(String statement, Object[] params, String[] outputColumns) throws DataAccessException {
         try (Connection conn = SQLDatabaseManager.getConnection()) {
@@ -107,34 +134,34 @@ public class SQLAccessData implements AccessData {
                         }
                     }
                 }
-                ps.executeUpdate();
-
-                ResultSet rs = ps.getGeneratedKeys();
-                int i = 0;
-                ArrayList<ArrayList<Object>> output = new ArrayList<> ();
-                while (rs.next()) {
-                    if (outputColumns == null) { return arrayWrap(1); }
-                    ArrayList<Object> rowData = new ArrayList<>();
-                    for (int j = 0 ; j < outputColumns.length ; j++) {
-                        rowData.add(rs.getObject(j+1));
+                if (statement.startsWith("SELECT")) {
+                    ResultSet rs = ps.executeQuery();
+                    if (rs == null) { return null; }
+                    int i = 0;
+                    ArrayList<ArrayList<Object>> output = new ArrayList<> ();
+                    while (rs.next()) {
+                        if (outputColumns == null) { return null; }
+                        ArrayList<Object> rowData = new ArrayList<>();
+                        for (int j = 0 ; j < outputColumns.length ; j++) {
+                            rowData.add(rs.getObject(j+1));
+                        }
+                        output.add(rowData);
+                        i++;
                     }
-                    output.add(rowData);
-                    i++;
+                    if (i==0) { return null; }
+                    else {return output;}
+                } else if (statement.startsWith("INSERT") || statement.startsWith("DELETE")) {
+                    ps.executeUpdate();
+                    // ResultSet keys = ps.getGeneratedKeys();
+                    // return generated keys (if applicable)
+                    return null;
+                } else {
+                    throw new DataAccessException("Cannot execute this SQL statement here");
                 }
-                if (i==0) { return arrayWrap(0); }
-                else {return output;}
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
-    }
-
-    private ArrayList<ArrayList<Object>> arrayWrap(Object input) {
-        ArrayList<ArrayList<Object>> outer = new ArrayList<>();
-        ArrayList<Object> inner = new ArrayList<>();
-        inner.add(input);
-        outer.add(inner);
-        return outer;
     }
 
     private final String[] createStatements = {

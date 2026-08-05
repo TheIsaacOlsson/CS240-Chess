@@ -1,3 +1,5 @@
 package server.RequestResponse;
 
-public record JoinRequest (String playerColor, Integer gameID) {}
+import chess.ChessGame;
+
+public record JoinRequest (ChessGame.TeamColor playerColor, Integer gameID) {}
