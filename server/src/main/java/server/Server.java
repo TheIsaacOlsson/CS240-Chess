@@ -1,5 +1,7 @@
 package server;
 
+import dataaccess.DataAccessException;
+import dataaccess.Database;
 import io.javalin.*;
 import server.Handlers.*;
 

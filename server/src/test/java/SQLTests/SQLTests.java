@@ -1,15 +1,30 @@
 package SQLTests;
 
-import dataaccess.AuthData;
-import dataaccess.MemoryDatabase;
-import dataaccess.UserData;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import dataaccess.*;
+import org.junit.jupiter.api.*;
+import server.Server;
 import server.Service.RegisterService;
+import server.Service.ValidateService;
 
 public class SQLTests {
+    private static Server server;
+
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
+
+    @BeforeAll
+    public static void init() {
+        server = new Server();
+        var port = server.run(0);
+        try {
+            new Database();
+        } catch (DataAccessException e) {
+            System.out.printf("Database was not able to initialize: %s", e.getMessage());
+        }
+        System.out.println("Started test HTTP server on " + port);
+    }
 
     @Test
     @Order(1)
@@ -17,12 +32,9 @@ public class SQLTests {
     public void registrationSuccess() {
         UserData newUser = new UserData("my_username", "my_password", "my_email@email.git");
         AuthData newUserAuth = RegisterService.register(newUser);
-        Assertions.assertFalse(MemoryDatabase.getUsers().isEmpty(), "Database is empty");
-        Assertions.assertTrue(MemoryDatabase.getUsers().containsKey("my_username"), "Username not found");
 
-        Assertions.assertNotNull(newUserAuth);
-        Assertions.assertFalse(MemoryDatabase.getCurrentAuth().isEmpty(), "No AuthData saved");
-        Assertions.assertTrue(MemoryDatabase.getCurrentAuth().containsKey(newUserAuth.authToken()));
+        Assertions.assertTrue(ValidateService.isUser(newUser.username())); // Verifies user got made if not already there
+        Assertions.assertNotNull(newUserAuth); // Verifies that user was not already there (Clear database first)
     }
 
     @Test
@@ -36,7 +48,6 @@ public class SQLTests {
         AuthData secondUserAuth = RegisterService.register(userTwo);
 
         Assertions.assertNull(secondUserAuth);
-        Assertions.assertTrue(MemoryDatabase.getUsers().containsValue(userOne));
+        Assertions.assertTrue(ValidateService.isUser(userOne.username()));
     }
-
 }

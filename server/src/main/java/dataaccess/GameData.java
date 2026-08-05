@@ -26,7 +26,7 @@ public class GameData {
     }
 
     private Integer generateID() {
-        while (Database.FetchData.getGames().containsKey(nextID)) {
+        while (Database.DataAccess.getGames().containsKey(nextID)) {
             if(nextID == 9999) {nextID=1;} else {nextID++;}
         }
         return nextID++;

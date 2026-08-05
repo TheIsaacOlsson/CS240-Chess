@@ -47,19 +47,17 @@ public class SQLAccessData implements AccessData {
 
     public UserData getUser(String username) {
         try (Connection conn = SQLDatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM userData WHERE username=?";
+            var statement = "SELECT password, email FROM userData WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        String password = rs.getString("password");
-                        String email = rs.getString("email");
-                        return new UserData(username, password, email);
+                        return new UserData(username, rs.getString("password"), rs.getString("email"));
                     }
                 }
             }
         } catch (Exception e) {
-            System.out.printf("Unable to read data: %s", e.getMessage());
+            System.out.printf("Unable to add authorization: %s", e.getMessage());
         }
         return null;
     }

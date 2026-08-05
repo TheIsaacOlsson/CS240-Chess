@@ -2,7 +2,7 @@ package dataaccess;
 
 /**
  * Switch between a Memory-based database
- * and an SQL database by changing the "type" variable
+ * and an SQL database by changing the "databaseType" variable
  */
 public class Database {
     private enum type {
