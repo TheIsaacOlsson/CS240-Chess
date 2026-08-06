@@ -3,9 +3,9 @@ package server.Handlers;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import io.javalin.http.Context;
-import server.RequestResponse.CreateGameRequest;
-import server.RequestResponse.CreateGameResponse;
-import serverFacade.ErrorResponse;
+import serverFacade.RequestResponse.CreateGameRequest;
+import serverFacade.RequestResponse.CreateGameResponse;
+import serverFacade.RequestResponse.ErrorResponse;
 import server.Service.CreateGameService;
 import server.Service.ValidateService;
 

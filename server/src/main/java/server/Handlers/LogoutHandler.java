@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
-import serverFacade.ErrorResponse;
-import server.RequestResponse.LogoutResponse;
+import serverFacade.RequestResponse.ErrorResponse;
+import serverFacade.RequestResponse.LogoutResponse;
 import server.Service.LogoutService;
 
 public class LogoutHandler {

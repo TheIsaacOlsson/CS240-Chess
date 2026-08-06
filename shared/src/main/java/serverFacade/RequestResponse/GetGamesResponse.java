@@ -1,3 +1,3 @@
-package server.RequestResponse;
+package serverFacade.RequestResponse;
 
 public record GetGamesResponse(AbbrGameData[] games) {}

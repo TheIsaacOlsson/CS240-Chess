@@ -1,12 +1,12 @@
 package server.Handlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
 import io.javalin.http.Context;
-import serverFacade.ErrorResponse;
-import server.RequestResponse.LoginRequest;
-import server.RequestResponse.LoginResponse;
+import serverFacade.RequestResponse.ErrorResponse;
+import serverFacade.RequestResponse.LoginRequest;
+import serverFacade.RequestResponse.LoginResponse;
 import server.Service.LoginService;
 
 public class LoginHandler {

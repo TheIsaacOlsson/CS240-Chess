@@ -3,8 +3,8 @@ package server.Service;
 import chess.ChessGame;
 import dataaccess.ConnectionException;
 import dataaccess.Database;
-import dataaccess.GameData;
-import server.RequestResponse.JoinRequest;
+import serverFacade.ChessData.GameData;
+import serverFacade.RequestResponse.JoinRequest;
 
 public class JoinGameService {
     public static void joinGame(JoinRequest request, String authToken) throws ColorTakenException, ConnectionException {

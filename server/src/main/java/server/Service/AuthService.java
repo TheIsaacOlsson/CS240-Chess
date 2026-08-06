@@ -1,6 +1,6 @@
 package server.Service;
 
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
 import dataaccess.Database;
 

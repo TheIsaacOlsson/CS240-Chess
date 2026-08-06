@@ -3,7 +3,7 @@ package server.Handlers;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import io.javalin.http.Context;
-import serverFacade.ErrorResponse;
+import serverFacade.RequestResponse.ErrorResponse;
 import server.Service.ClearDatabaseService;
 
 public class ClearDataHandler {

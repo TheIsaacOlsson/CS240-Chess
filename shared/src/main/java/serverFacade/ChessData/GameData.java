@@ -1,7 +1,7 @@
-package dataaccess;
+package serverFacade.ChessData;
 
 import chess.ChessGame;
-import server.RequestResponse.AbbrGameData;
+import serverFacade.RequestResponse.AbbrGameData;
 
 public class GameData {
     private static Integer nextID = 1;
@@ -36,8 +36,20 @@ public class GameData {
         return gameID;
     }
 
+    public String getGameName() { return gameName; }
+
+    public ChessGame getGame() { return game; }
+
     public void setGameID(int id) {
         gameID = id;
+    }
+
+    public void setBlackUsername(String blackUsername) {
+        this.blackUsername = blackUsername;
+    }
+
+    public void setWhiteUsername(String whiteUsername) {
+        this.whiteUsername = whiteUsername;
     }
 
     public AbbrGameData abbreviate() {

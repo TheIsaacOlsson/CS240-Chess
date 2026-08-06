@@ -1,10 +1,10 @@
 package server.Service;
 
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
 import dataaccess.Database;
 import org.mindrot.jbcrypt.BCrypt;
-import server.RequestResponse.LoginRequest;
+import serverFacade.RequestResponse.LoginRequest;
 
 public class LoginService {
     public static AuthData login(LoginRequest login) throws ConnectionException {

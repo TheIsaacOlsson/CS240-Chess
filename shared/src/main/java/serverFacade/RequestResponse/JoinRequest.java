@@ -1,4 +1,4 @@
-package server.RequestResponse;
+package serverFacade.RequestResponse;
 
 import chess.ChessGame;
 

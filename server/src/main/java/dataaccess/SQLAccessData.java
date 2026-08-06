@@ -2,7 +2,10 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import server.RequestResponse.JoinRequest;
+import serverFacade.ChessData.AuthData;
+import serverFacade.ChessData.GameData;
+import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.JoinRequest;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -44,7 +47,7 @@ public class SQLAccessData implements AccessData {
         var statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         try {
             ArrayList<ArrayList<Object>> wrappedID;
-            wrappedID = executeStatement(statement, new Object[] {newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.gameName, newGame.game}, null);
+            wrappedID = executeStatement(statement, new Object[] {newGame.getWhiteUsername(), newGame.getBlackUsername(), newGame.getGameName(), newGame.getGame()}, null);
             return (Integer) unwrapObject(wrappedID);
         } catch (ConnectionException e) {
             throw e;

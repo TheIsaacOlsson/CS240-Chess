@@ -1,12 +1,12 @@
 package server.Handlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
-import dataaccess.UserData;
+import serverFacade.ChessData.UserData;
 import io.javalin.http.Context;
-import serverFacade.ErrorResponse;
-import server.RequestResponse.RegisterResponse;
+import serverFacade.RequestResponse.ErrorResponse;
+import serverFacade.RequestResponse.RegisterResponse;
 import server.Service.RegisterService;
 
 public class RegisterHandler {

@@ -1,5 +1,9 @@
 package dataaccess;
 
+import serverFacade.ChessData.AuthData;
+import serverFacade.ChessData.GameData;
+import serverFacade.ChessData.UserData;
+
 import java.util.HashMap;
 import java.util.Map;
 

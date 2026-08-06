@@ -1,6 +1,8 @@
 package serverFacade;
 
 import com.google.gson.Gson;
+import serverFacade.RequestResponse.ErrorResponse;
+import serverFacade.RequestResponse.RegisterResponse;
 
 import java.net.*;
 import java.net.http.*;
@@ -22,6 +24,26 @@ public class ServerFacade {
     // getGames
     // createGame
     // joinGame
+
+    /*
+    public Pet addPet(Pet pet) throws ResponseException {
+        var request = buildRequest("POST", "/pet", pet);
+        var response = sendRequest(request);
+        return handleResponse(response, Pet.class);
+    }
+
+    public void deletePet(int id) throws ResponseException {
+        var path = String.format("/pet/%s", id);
+        var request = buildRequest("DELETE", path, null);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    public void deleteAllPets() throws ResponseException {
+        var request = buildRequest("DELETE", "/pet", null);
+        sendRequest(request);
+    }
+     */
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()

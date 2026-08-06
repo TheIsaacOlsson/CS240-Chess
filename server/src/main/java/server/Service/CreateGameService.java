@@ -2,7 +2,7 @@ package server.Service;
 
 import dataaccess.ConnectionException;
 import dataaccess.Database;
-import dataaccess.GameData;
+import serverFacade.ChessData.GameData;
 
 public class CreateGameService {
     public static Integer makeGame(String gameName) throws ConnectionException {

@@ -1,6 +1,9 @@
 package dataaccess;
 
-import server.RequestResponse.JoinRequest;
+import serverFacade.ChessData.AuthData;
+import serverFacade.ChessData.GameData;
+import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.JoinRequest;
 
 import java.util.Map;
 

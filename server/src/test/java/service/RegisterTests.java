@@ -1,8 +1,8 @@
 package service;
 
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.MemoryDatabase;
-import dataaccess.UserData;
+import serverFacade.ChessData.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;

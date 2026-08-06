@@ -1,9 +1,9 @@
 package server.Service;
 
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
 import dataaccess.Database;
-import dataaccess.UserData;
+import serverFacade.ChessData.UserData;
 
 public class ValidateService {
     public static boolean isUser(String username) throws ConnectionException {

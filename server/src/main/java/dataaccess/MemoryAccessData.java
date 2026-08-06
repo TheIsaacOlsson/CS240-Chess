@@ -1,6 +1,9 @@
 package dataaccess;
 
-import server.RequestResponse.JoinRequest;
+import serverFacade.ChessData.AuthData;
+import serverFacade.ChessData.GameData;
+import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.JoinRequest;
 
 import java.util.Map;
 
@@ -30,8 +33,8 @@ public class MemoryAccessData implements AccessData {
     public void addToGame(JoinRequest request, String username) {
         GameData requestedGame = MemoryDatabase.getGames().get(request.gameID());
         switch (request.playerColor()) {
-            case WHITE -> requestedGame.whiteUsername = username;
-            case BLACK -> requestedGame.blackUsername = username;
+            case WHITE -> requestedGame.setWhiteUsername(username);
+            case BLACK -> requestedGame.setBlackUsername(username);
         }
     }
 

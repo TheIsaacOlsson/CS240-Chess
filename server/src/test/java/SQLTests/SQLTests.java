@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.Service.RegisterService;
 import server.Service.ValidateService;
+import serverFacade.ChessData.AuthData;
+import serverFacade.ChessData.UserData;
 
 public class SQLTests {
     private static Server server;

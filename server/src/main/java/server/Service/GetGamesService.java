@@ -2,8 +2,8 @@ package server.Service;
 
 import dataaccess.ConnectionException;
 import dataaccess.Database;
-import dataaccess.GameData;
-import server.RequestResponse.AbbrGameData;
+import serverFacade.ChessData.GameData;
+import serverFacade.RequestResponse.AbbrGameData;
 
 import java.util.ArrayList;
 import java.util.Map;

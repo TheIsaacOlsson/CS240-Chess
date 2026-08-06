@@ -1,10 +1,10 @@
 package server.Service;
 
 
-import dataaccess.AuthData;
+import serverFacade.ChessData.AuthData;
 import dataaccess.ConnectionException;
 import dataaccess.Database;
-import dataaccess.UserData;
+import serverFacade.ChessData.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterService {
