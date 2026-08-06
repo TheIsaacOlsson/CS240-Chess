@@ -5,7 +5,7 @@ import dataaccess.AuthData;
 import dataaccess.ConnectionException;
 import dataaccess.UserData;
 import io.javalin.http.Context;
-import server.RequestResponse.ErrorResponse;
+import serverFacade.ErrorResponse;
 import server.RequestResponse.RegisterResponse;
 import server.Service.RegisterService;
 

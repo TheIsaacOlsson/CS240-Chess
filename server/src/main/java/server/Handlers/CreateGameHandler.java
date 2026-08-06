@@ -5,7 +5,7 @@ import dataaccess.ConnectionException;
 import io.javalin.http.Context;
 import server.RequestResponse.CreateGameRequest;
 import server.RequestResponse.CreateGameResponse;
-import server.RequestResponse.ErrorResponse;
+import serverFacade.ErrorResponse;
 import server.Service.CreateGameService;
 import server.Service.ValidateService;
 

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
-import server.RequestResponse.ErrorResponse;
+import serverFacade.ErrorResponse;
 import server.RequestResponse.LogoutResponse;
 import server.Service.LogoutService;
 

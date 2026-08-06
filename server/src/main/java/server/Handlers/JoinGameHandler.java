@@ -3,7 +3,7 @@ package server.Handlers;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import io.javalin.http.Context;
-import server.RequestResponse.ErrorResponse;
+import serverFacade.ErrorResponse;
 import server.RequestResponse.JoinRequest;
 import server.RequestResponse.JoinResponse;
 import server.Service.ColorTakenException;

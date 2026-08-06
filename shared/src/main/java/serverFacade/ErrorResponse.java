@@ -1,3 +1,3 @@
-package server.RequestResponse;
+package serverFacade;
 
 public record ErrorResponse (String message) {}
