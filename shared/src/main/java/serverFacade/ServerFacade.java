@@ -1,8 +1,8 @@
 package serverFacade;
 
 import com.google.gson.Gson;
-import serverFacade.RequestResponse.ErrorResponse;
-import serverFacade.RequestResponse.RegisterResponse;
+import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.*;
 
 import java.net.*;
 import java.net.http.*;
@@ -19,41 +19,71 @@ public class ServerFacade {
     }
 
     // Register
-    // Login
-    // Logout
-    // getGames
-    // createGame
-    // joinGame
-
-    /*
-    public Pet addPet(Pet pet) throws ResponseException {
-        var request = buildRequest("POST", "/pet", pet);
+    public RegisterResponse register(UserData userData) throws ResponseException {
+        var request = buildRequest("POST", "/user", userData);
         var response = sendRequest(request);
-        return handleResponse(response, Pet.class);
+        return handleResponse(response, RegisterResponse.class);
     }
 
-    public void deletePet(int id) throws ResponseException {
-        var path = String.format("/pet/%s", id);
-        var request = buildRequest("DELETE", path, null);
+    // Login
+    public LoginResponse login(LoginRequest login) throws ResponseException {
+        var request = buildRequest("POST", "/session", login);
+        var response = sendRequest(request);
+        return handleResponse(response, LoginResponse.class);
+    }
+
+    // Logout
+    public void logout(String authorization) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", null, authorization);
         var response = sendRequest(request);
         handleResponse(response, null);
     }
 
-    public void deleteAllPets() throws ResponseException {
-        var request = buildRequest("DELETE", "/pet", null);
+    // getGames
+    public GetGamesResponse getGames(String authorization) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, authorization);
+        var response = sendRequest(request);
+        return handleResponse(response, GetGamesResponse.class);
+    }
+
+    // createGame
+    public CreateGameResponse makeGame(String authorization, CreateGameRequest gameReq) throws ResponseException {
+        var request = buildRequest("POST", "/game", gameReq, authorization);
+        var response = sendRequest(request);
+        return handleResponse(response, CreateGameResponse.class);
+    }
+
+    // joinGame
+    public void join(String authorization, JoinRequest joinReq) throws ResponseException {
+        var request = buildRequest("PUT", "/game", joinReq, authorization);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    /*
+    private void clearDatabase() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
     }
-     */
+    */
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String authorization) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
+        if (authorization != null) {
+            request.setHeader("authorization", authorization);
+        }
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
         return request.build();
     }
+
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        return buildRequest(method, path, body, null);
+    }
+
 
     private BodyPublisher makeRequestBody(Object request) {
         if (request != null) {
