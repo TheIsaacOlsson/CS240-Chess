@@ -5,28 +5,30 @@ import serverFacade.ServerFacade;
 
 import java.util.Scanner;
 
-public class UnregisteredClient {
+public class UserClient {
     private final ServerFacade server;
+    private final Scanner scanner;
 
-    public UnregisteredClient(String serverUrl) throws ResponseException {
-        server = new ServerFacade(serverUrl);
+    public UserClient(ServerFacade server, Scanner scanner) {
+        this.server = server;
+        this.scanner = scanner;
     }
 
     public void run() {
-        // System.out.println(LOGO + " Welcome to the chess server. Sign in to start.");
-        // System.out.print(help());
+        // Personalized welcome by username
+        // help info for registered users
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit")) {
+        while (!result.equals("logout")) {
             // print ">>> "
             String line = scanner.nextLine();
 
             try {
                 // evaluate result
 
-                if (result.equals("authorized")) {
-                    new UserClient(server, scanner).run();
+                if (result.equals("joinGame")) {
+                    // create new inner repl and pass it the ServerFacade and the scanner
                 }
             } catch (Throwable e) {
                 // Show the error in the logs, but don't print
