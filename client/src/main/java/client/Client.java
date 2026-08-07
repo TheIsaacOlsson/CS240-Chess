@@ -1,5 +1,7 @@
 package client;
 
+import serverFacade.ResponseException;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -23,7 +25,9 @@ public interface Client {
             String line = scanner.nextLine();
 
             result = eval(line);
-            // if error, sanitize and return relevant information
+            if (result.message().equals("Error")) {
+                notify(sanitizeError(result.error()));
+            }
 
             printToUser(result.message());
 
@@ -43,6 +47,17 @@ public interface Client {
         System.out.println(SET_TEXT_COLOR_RED + notification);
         printPrompt();
         resetOutputStyle();
+    }
+
+    default String sanitizeError(ResponseException error) {
+        int code = error.getStatusCode();
+        switch (code) {
+            case 500 -> {return "Server failure, please try again later.";}
+            case 401 -> {return "Unauthorized, please sign in.";}
+            case 400 -> {return "Unknown request. Review the commands and try again. Make sure to include each part in one command.";}
+            case 403 -> {return "This is already taken.";}
+            default -> {return "Unknown error";}
+        }
     }
 
     default void printToUser(String output) {

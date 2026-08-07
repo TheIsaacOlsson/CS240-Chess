@@ -1,5 +1,5 @@
 package client;
 
-import serverFacade.ChessData.AuthData;
+import serverFacade.ResponseException;
 
-public record EvalResult(String message, Throwable error) {}
+public record EvalResult(String message, ResponseException error) {}
