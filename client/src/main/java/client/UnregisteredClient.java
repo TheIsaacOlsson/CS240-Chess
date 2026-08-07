@@ -1,5 +1,6 @@
 package client;
 
+import serverFacade.ChessData.UserData;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
@@ -18,7 +19,7 @@ public class UnregisteredClient implements Client {
 
     public void run() {
         resetOutputStyle();
-        System.out.println(" Welcome to the chess server! Sign in to start.");
+        System.out.println(" Welcome to the chess server! Log in to start.");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -27,16 +28,12 @@ public class UnregisteredClient implements Client {
             printPrompt();
             String line = scanner.nextLine();
 
-            try {
-                result = eval(line);
-                resetOutputStyle();
-                System.out.print(result);
+            result = eval(line);
+            resetOutputStyle();
+            System.out.print(result);
 
-                if (result.equals("authorized")) {
-                    new UserClient(server, scanner).run();
-                }
-            } catch (Throwable e) {
-                // Show the error in the logs, but don't print
+            if (result.equals("authorized")) {
+                new UserClient(server, scanner).run();
             }
         }
         System.out.println();
@@ -50,12 +47,12 @@ public class UnregisteredClient implements Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
-                case "signin" -> signIn(params);
+                case "login" -> signIn(params);
                 case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
-            return ex.getMessage();
+            return ex.getMessage(); // Deal with the error better (sanitize before printing)
         }
     }
 
@@ -65,7 +62,7 @@ public class UnregisteredClient implements Client {
                 """
                 Type one of these commands to navigate:
                 - Register as a new user >>> %s register <username> <password> <email> %s
-                - Sign in to your account >>> %s signin <username> <password> %s
+                - Sign in to your account >>> %s login <username> <password> %s
                 - See this message again >>> %s help %s
                 - Exit the program >>> %s quit %s
                 """,
@@ -76,11 +73,23 @@ public class UnregisteredClient implements Client {
                 );
     }
 
-    public String register(String[] params) {
-        return "";
+    public String register(String[] params) throws ResponseException {
+        // register <username> <password> <email>
+        if (params.length >= 3) {
+            var response = server.register(new UserData(params[0], params[1], params[2]));
+            return "authorized";
+        } else {
+            throw new ResponseException(400, "Expected: register <username> <password> <email>");
+        }
     }
 
     public String signIn(String[] params) {
-        return "";
+        // signin <username> <password>
+        if (params.length >= 2) {
+            var response = server.register(new UserData(params[0], params[1], params[2]));
+            return "authorized";
+        } else {
+            throw new ResponseException(400, "Expected: login <username> <password>");
+        }
     }
 }
