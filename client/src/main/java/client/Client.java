@@ -3,25 +3,25 @@ package client;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ServerFacade;
 
+import java.util.Map;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public interface Client {
-    ServerFacade getServer();
     Scanner getScanner();
     String startupMessage();
     String exitCondition();
     boolean hasChildREPL();
     String moveToChildCondition();
-    void runChildREPL(ServerFacade server, Scanner scanner, AuthData userAuth);
+    void runChildREPL();
 
     default void run() {
         printToUser(startupMessage());
         printToUser(help());
 
         Scanner scanner = getScanner();
-        EvalResult result = new EvalResult("", null, null);
+        EvalResult result = new EvalResult("", null);
         while (!result.message().equals(exitCondition())) {
             printPrompt();
             String line = scanner.nextLine();
@@ -32,7 +32,8 @@ public interface Client {
             printToUser(result.message());
 
             if (hasChildREPL() && result.message().equals(moveToChildCondition())) {
-                runChildREPL(getServer(), scanner, result.auth());
+
+                runChildREPL();
             }
         }
         printToUser("");

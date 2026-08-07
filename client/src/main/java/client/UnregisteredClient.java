@@ -7,21 +7,24 @@ import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class UnregisteredClient implements Client {
     private final ServerFacade server;
+    private Map<String, Object> clientData = new HashMap<>();
+    private Scanner scanner = new Scanner(System.in);
 
-    public ServerFacade getServer() { return server; }
-    public Scanner getScanner() { return new Scanner(System.in); }
+    public Scanner getScanner() { return scanner; }
     public String startupMessage() { return "Welcome to the chess server! Log in to start."; }
     public String exitCondition() { return "quit"; }
     public boolean hasChildREPL() { return true; }
     public String moveToChildCondition() { return "authorized"; }
-    public void runChildREPL(ServerFacade server, Scanner scanner, AuthData userAuth) {
-        new UserClient(server, scanner, userAuth).run();
+    public void runChildREPL() {
+        new UserClient(server, scanner, clientData).run();
 
         printToUser(help());
     }
@@ -39,11 +42,11 @@ public class UnregisteredClient implements Client {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> signIn(params);
-                case "quit" -> new EvalResult("quit", null, null);
-                default -> new EvalResult(help(), null, null);
+                case "quit" -> new EvalResult("quit", null);
+                default -> new EvalResult(help(), null);
             };
         } catch (ResponseException ex) {
-            return new EvalResult("Error", null, ex);
+            return new EvalResult("Error", ex);
         }
     }
 
@@ -68,7 +71,9 @@ public class UnregisteredClient implements Client {
         // register <username> <password> <email>
         if (params.length >= 3) {
             var response = server.register(new UserData(params[0], params[1], params[2]));
-            return new EvalResult("authorized", new AuthData(response.authToken(), response.username()), null);
+            clientData.put("username", response.username());
+            clientData.put("authToken", response.authToken());
+            return new EvalResult("authorized", null);
         } else {
             throw new ResponseException(400, "Expected: register <username> <password> <email>");
         }
@@ -78,7 +83,9 @@ public class UnregisteredClient implements Client {
         // signin <username> <password>
         if (params.length >= 2) {
             var response = server.login(new LoginRequest(params[0], params[1]));
-            return new EvalResult("authorized", new AuthData(response.authToken(), response.username()), null);
+            clientData.put("username", response.username());
+            clientData.put("authToken", response.authToken());
+            return new EvalResult("authorized", null);
         } else {
             throw new ResponseException(400, "Expected: login <username> <password>");
         }
