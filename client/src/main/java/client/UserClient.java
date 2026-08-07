@@ -5,7 +5,7 @@ import serverFacade.ServerFacade;
 
 import java.util.Scanner;
 
-public class UserClient {
+public class UserClient implements Client {
     private final ServerFacade server;
     private final Scanner scanner;
 
@@ -35,5 +35,15 @@ public class UserClient {
             }
         }
         System.out.println();
+    }
+
+    @Override
+    public String eval(String input) {
+        return "";
+    }
+
+    @Override
+    public String help() {
+        return "A string that shows what the possible commands are (with displayed input format)";
     }
 }

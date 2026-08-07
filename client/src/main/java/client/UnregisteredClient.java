@@ -5,7 +5,7 @@ import serverFacade.ServerFacade;
 
 import java.util.Scanner;
 
-public class UnregisteredClient {
+public class UnregisteredClient implements Client {
     private final ServerFacade server;
 
     public UnregisteredClient(String serverUrl) throws ResponseException {
@@ -33,5 +33,15 @@ public class UnregisteredClient {
             }
         }
         System.out.println();
+    }
+
+    @Override
+    public String eval(String input) {
+        return "";
+    }
+
+    @Override
+    public String help() {
+        return "A string that shows what the possible commands are (with displayed input format)";
     }
 }

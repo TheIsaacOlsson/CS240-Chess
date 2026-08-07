@@ -5,7 +5,7 @@ import serverFacade.ServerFacade;
 
 import java.util.Scanner;
 
-public class ChessGameClient {
+public class ChessGameClient implements Client {
     private final ServerFacade server;
     private final Scanner scanner;
 
@@ -16,5 +16,15 @@ public class ChessGameClient {
 
     public void run() {
         // For this phase, just print the gameboard from each side.
+    }
+
+    @Override
+    public String help() {
+        return "";
+    }
+
+    @Override
+    public String eval(String input) {
+        return "";
     }
 }
