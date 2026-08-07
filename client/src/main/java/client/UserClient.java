@@ -9,6 +9,7 @@ import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -81,7 +82,7 @@ public class UserClient implements Client {
         // new <GameName>
         if (params.length >= 1) {
             var response = server.makeGame((String) clientData.get("authToken"), new CreateGameRequest(params[0]));
-            return new EvalResult(String.format("Game created with ID: %d", response.gameID()), null);
+            return new EvalResult("Game created. See games to find your game ID", null);
         } else {
             throw new ResponseException(400, "Expected: new <GameName>");
         }
@@ -89,14 +90,16 @@ public class UserClient implements Client {
 
     public EvalResult joinGame(String[] params) throws ResponseException {
         // join <GameID> <White/Black>
+        if ( ! clientData.containsKey("taggedGameIDs")) { throw new ResponseException(400, "View available games"); }
         if (params.length >= 2) {
             String writtenID = params[0];
-            int gameID;
+            int gameKey;
             try {
-                gameID = Integer.parseInt(writtenID);
+                gameKey = Integer.parseInt(writtenID);
             } catch (NumberFormatException e) {
                 throw new ResponseException(400, "Invalid Game ID");
             }
+
             String writtenColor = params[1];
             ChessGame.TeamColor color;
             if (writtenColor.equals("white")) {
@@ -106,8 +109,10 @@ public class UserClient implements Client {
             } else {
                 throw new ResponseException(400, "Player Color must be either Black or White");
             }
+            Map<Integer, Integer> taggedGameIDs = (Map<Integer, Integer>) (clientData.get("taggedGameIDs"));
+            Integer gameID = taggedGameIDs.get(gameKey);
 
-            server.join((String) clientData.get("authToken"), new JoinRequest(color, gameID));
+            server.join((String) (clientData.get("authToken")), new JoinRequest(color, gameID));
             clientData.put("gameID", gameID);
             clientData.put("playerColor", color);
             return new EvalResult("joinGame", null);
@@ -118,16 +123,20 @@ public class UserClient implements Client {
 
     public EvalResult observeGame(String[] params) throws ResponseException {
         // observe <GameID>
+        if ( ! clientData.containsKey("taggedGameIDs")) { throw new ResponseException(400, "View available games"); }
         if (params.length >= 1) {
             String writtenID = params[0];
-            int gameID;
+            int gameKey;
             try {
-                gameID = Integer.parseInt(writtenID);
+                gameKey = Integer.parseInt(writtenID);
             } catch (NumberFormatException e) {
                 throw new ResponseException(400, "Invalid Game ID");
             }
 
-            // server.join((String) clientData.get("authToken"), new JoinRequest(color, gameID));
+            Map<Integer, Integer> taggedGameIDs = (Map<Integer, Integer>) (clientData.get("taggedGameIDs"));
+            if ( ! taggedGameIDs.containsKey(gameKey)) { throw new ResponseException(400, "Game not found"); }
+            Integer gameID = taggedGameIDs.get(gameKey);
+
             clientData.put("gameID", gameID);
             clientData.put("playerColor", null);
             return new EvalResult("joinGame", null);
@@ -144,14 +153,19 @@ public class UserClient implements Client {
     }
 
     private String listGames(AbbrGameData[] games) {
+        clientData.remove("taggedGameIDs");
         if (games == null || games.length < 1) {
             return "No games available! Create your own with \"new <GameName>\".";
         } else {
-            // Come back and format this as a table when working on chess board design
+            Map<Integer, Integer> taggedIDs = new HashMap<>();
+            Integer gameTag = 1;
             printToUser(String.format(" %s  %s  %s  %s", pad("ID", 4), pad("Name", 10), pad("White", 10), pad("Black", 10)));
             for (AbbrGameData game : games) {
-                printToUser(String.format(" %s  %s  %s  %s", pad(String.format("%d", game.gameID()), 4), pad(game.gameName(), 10), pad(game.whiteUsername(), 10), pad(game.blackUsername(), 10)));
+                taggedIDs.put(gameTag, game.gameID());
+                printToUser(String.format(" %s  %s  %s  %s", pad(String.format("%d", gameTag), 4), pad(game.gameName(), 10), pad(game.whiteUsername(), 10), pad(game.blackUsername(), 10)));
+                gameTag++;
             }
+            clientData.put("taggedGameIDs", taggedIDs);
             return "To join a game, use the command \"join <GameID> <White/Black>\"";
         }
     }
@@ -160,7 +174,7 @@ public class UserClient implements Client {
         if (input == null) { return " ".repeat(length); }
         int inputLength = input.length();
         if (inputLength >= length) {
-            return input.substring(0, length-1);
+            return input.substring(0, length);
         } else {
             return input + " ".repeat(length-inputLength);
         }

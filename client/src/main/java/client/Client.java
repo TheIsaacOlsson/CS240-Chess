@@ -27,6 +27,7 @@ public interface Client {
             result = eval(line);
             if (result.message().equals("Error")) {
                 notify(sanitizeError(result.error()));
+                continue;
             }
 
             printToUser(result.message());
@@ -45,7 +46,6 @@ public interface Client {
 
     default void notify(String notification) {
         System.out.println(SET_TEXT_COLOR_RED + notification);
-        printPrompt();
         resetOutputStyle();
     }
 
@@ -53,7 +53,7 @@ public interface Client {
         int code = error.getStatusCode();
         switch (code) {
             case 500 -> {return "Server failure, please try again later.";}
-            case 401 -> {return "Unauthorized, please sign in.";}
+            case 401 -> {return "Unauthorized";}
             case 400 -> {return "Unknown request. Review the commands and try again. Make sure to include each part in one command.";}
             case 403 -> {return "This is already taken.";}
             default -> {return "Unknown error";}
