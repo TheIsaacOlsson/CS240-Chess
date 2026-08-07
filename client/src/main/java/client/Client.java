@@ -15,9 +15,13 @@ public interface Client {
         resetOutputStyle();
     }
 
-    default void printPrompt() {
-        System.out.print("\n" + SET_TEXT_COLOR_GREEN + ">>> " + SET_TEXT_COLOR_BLACK);
+    default void printToUser(String output) {
         resetOutputStyle();
+        System.out.println(output);
+    }
+
+    default void printPrompt() {
+        System.out.print("\n>>> ");
     }
 
     default void resetOutputStyle() {

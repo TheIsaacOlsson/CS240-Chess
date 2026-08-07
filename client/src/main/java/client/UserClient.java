@@ -15,6 +15,7 @@ public class UserClient implements Client {
     }
 
     public void run() {
+        System.out.print("You successfully signed in");
         // Personalized welcome by username
         // help info for registered users
 

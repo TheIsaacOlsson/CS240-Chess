@@ -1,6 +1,8 @@
 package client;
 
 import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.LoginRequest;
+import serverFacade.RequestResponse.RegisterRequest;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
@@ -18,9 +20,8 @@ public class UnregisteredClient implements Client {
     }
 
     public void run() {
-        resetOutputStyle();
-        System.out.println(" Welcome to the chess server! Log in to start.");
-        System.out.print(help());
+        printToUser(" Welcome to the chess server! Log in to start.");
+        printToUser(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -30,13 +31,13 @@ public class UnregisteredClient implements Client {
 
             result = eval(line);
             resetOutputStyle();
-            System.out.print(result);
+            printToUser(result);
 
             if (result.equals("authorized")) {
                 new UserClient(server, scanner).run();
             }
         }
-        System.out.println();
+        printToUser("");
     }
 
     @Override
@@ -77,7 +78,7 @@ public class UnregisteredClient implements Client {
         // register <username> <password> <email>
         if (params.length >= 3) {
             var response = server.register(new UserData(params[0], params[1], params[2]));
-            return "authorized";
+            return "authorized"; // Return an object with the output message and other internal information (like errors or authTokens)
         } else {
             throw new ResponseException(400, "Expected: register <username> <password> <email>");
         }
@@ -86,7 +87,7 @@ public class UnregisteredClient implements Client {
     public String signIn(String[] params) {
         // signin <username> <password>
         if (params.length >= 2) {
-            var response = server.register(new UserData(params[0], params[1], params[2]));
+            var response = server.login(new LoginRequest(params[0], params[1]));
             return "authorized";
         } else {
             throw new ResponseException(400, "Expected: login <username> <password>");
