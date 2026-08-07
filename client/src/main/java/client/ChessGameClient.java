@@ -11,6 +11,7 @@ public class ChessGameClient implements Client {
     private final Scanner scanner;
 
     public ServerFacade getServer() { return server; }
+    public Scanner getScanner() { return scanner; }
     public String startupMessage() { return "Ready to play?"; }
     public String exitCondition() { return "leave"; }
     public boolean hasChildREPL() { return false; }

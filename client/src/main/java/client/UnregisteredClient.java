@@ -15,12 +15,15 @@ public class UnregisteredClient implements Client {
     private final ServerFacade server;
 
     public ServerFacade getServer() { return server; }
+    public Scanner getScanner() { return new Scanner(System.in); }
     public String startupMessage() { return "Welcome to the chess server! Log in to start."; }
     public String exitCondition() { return "quit"; }
     public boolean hasChildREPL() { return true; }
     public String moveToChildCondition() { return "authorized"; }
     public void runChildREPL(ServerFacade server, Scanner scanner, AuthData userAuth) {
         new UserClient(server, scanner, userAuth).run();
+
+        printToUser(help());
     }
 
     public UnregisteredClient(String serverUrl) throws ResponseException {

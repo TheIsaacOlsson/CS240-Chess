@@ -9,6 +9,7 @@ import static ui.EscapeSequences.*;
 
 public interface Client {
     ServerFacade getServer();
+    Scanner getScanner();
     String startupMessage();
     String exitCondition();
     boolean hasChildREPL();
@@ -19,7 +20,7 @@ public interface Client {
         printToUser(startupMessage());
         printToUser(help());
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = getScanner();
         EvalResult result = new EvalResult("", null, null);
         while (!result.message().equals(exitCondition())) {
             printPrompt();
