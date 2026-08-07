@@ -2,7 +2,6 @@ package client;
 
 import chess.ChessGame;
 import serverFacade.ChessData.AuthData;
-import serverFacade.ChessData.UserData;
 import serverFacade.RequestResponse.AbbrGameData;
 import serverFacade.RequestResponse.CreateGameRequest;
 import serverFacade.RequestResponse.JoinRequest;
@@ -22,7 +21,7 @@ public class UserClient implements Client {
     private Map<String, Object> clientData;
 
     public Scanner getScanner() { return scanner; }
-    public String startupMessage() { return String.format("Welcome, %s!", ((AuthData) clientData.get("authData")).username()); }
+    public String startupMessage() { return String.format("Welcome, %s!", (String) clientData.get("username")); }
     public String exitCondition() { return "Logged out"; }
     public boolean hasChildREPL() { return true; }
     public String moveToChildCondition() { return "joinGame"; }
@@ -46,6 +45,7 @@ public class UserClient implements Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "games" -> getGames();
                 case "new" -> makeGame(params);
                 case "logout" -> logout();
@@ -62,11 +62,13 @@ public class UserClient implements Client {
                 """
                 Type one of these commands to navigate:
                 - Join a game >>> %s join <GameID> <White/Black> %s
+                - Observe a game >>> %s observe <GameID> %s
                 - See all games >>> %s games %s
                 - Create a game >>> %s new <GameName> %s
                 - See this message again >>> %s help %s
                 - Logout >>> %s logout %s
                 """,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
@@ -78,7 +80,7 @@ public class UserClient implements Client {
     public EvalResult makeGame(String[] params) throws ResponseException {
         // new <GameName>
         if (params.length >= 1) {
-            var response = server.makeGame(((AuthData) clientData.get("authData")).authToken(), new CreateGameRequest(params[0]));
+            var response = server.makeGame((String) clientData.get("authToken"), new CreateGameRequest(params[0]));
             return new EvalResult(String.format("Game created with ID: %d", response.gameID()), null);
         } else {
             throw new ResponseException(400, "Expected: new <GameName>");
@@ -105,17 +107,38 @@ public class UserClient implements Client {
                 throw new ResponseException(400, "Player Color must be either Black or White");
             }
 
-            server.join(((AuthData) clientData.get("authData")).authToken(), new JoinRequest(color, gameID));
+            server.join((String) clientData.get("authToken"), new JoinRequest(color, gameID));
             clientData.put("gameID", gameID);
+            clientData.put("playerColor", color);
             return new EvalResult("joinGame", null);
         } else {
             throw new ResponseException(400, "Expected: join <GameID> <White/Black>");
         }
     }
 
+    public EvalResult observeGame(String[] params) throws ResponseException {
+        // observe <GameID>
+        if (params.length >= 1) {
+            String writtenID = params[0];
+            int gameID;
+            try {
+                gameID = Integer.parseInt(writtenID);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(400, "Invalid Game ID");
+            }
+
+            // server.join((String) clientData.get("authToken"), new JoinRequest(color, gameID));
+            clientData.put("gameID", gameID);
+            clientData.put("playerColor", null);
+            return new EvalResult("joinGame", null);
+        } else {
+            throw new ResponseException(400, "Expected: observe <GameID>");
+        }
+    }
+
     public EvalResult getGames() throws ResponseException {
         // games
-        var result = server.getGames(((AuthData) clientData.get("authData")).authToken());
+        var result = server.getGames((String) clientData.get("authToken"));
         String response = listGames(result.games());
         return new EvalResult(response, null);
     }
@@ -135,8 +158,9 @@ public class UserClient implements Client {
 
     public EvalResult logout() throws ResponseException {
         // logout
-        server.logout(((AuthData) clientData.get("authData")).authToken());
+        server.logout((String) clientData.get("authToken"));
         clientData.remove("authData");
+        clientData.remove("username");
         return new EvalResult("Logged out", null);
     }
 }

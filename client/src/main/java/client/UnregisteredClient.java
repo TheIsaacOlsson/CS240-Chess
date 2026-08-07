@@ -1,6 +1,5 @@
 package client;
 
-import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.UserData;
 import serverFacade.RequestResponse.LoginRequest;
 import serverFacade.ResponseException;

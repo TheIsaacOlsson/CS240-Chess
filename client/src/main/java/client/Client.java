@@ -1,9 +1,5 @@
 package client;
 
-import serverFacade.ChessData.AuthData;
-import serverFacade.ServerFacade;
-
-import java.util.Map;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;

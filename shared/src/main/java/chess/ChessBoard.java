@@ -25,6 +25,10 @@ public class ChessBoard {
         }
     }
 
+    public ChessPiece[][] getSquares() {
+        return squares;
+    }
+
     /**
      * Returns the set of occupied positions
      */
