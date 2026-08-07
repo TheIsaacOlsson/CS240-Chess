@@ -148,11 +148,21 @@ public class UserClient implements Client {
             return "No games available! Create your own with \"new <GameName>\".";
         } else {
             // Come back and format this as a table when working on chess board design
-            printToUser("Game ID : Game Name : White Username : Black Username");
+            printToUser(String.format(" %s  %s  %s  %s", pad("ID", 4), pad("Name", 10), pad("White", 10), pad("Black", 10)));
             for (AbbrGameData game : games) {
-                printToUser(String.format(" %d : %s : %s : %s ", game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername()));
+                printToUser(String.format(" %s  %s  %s  %s", pad(String.format("%d", game.gameID()), 4), pad(game.gameName(), 10), pad(game.whiteUsername(), 10), pad(game.blackUsername(), 10)));
             }
             return "To join a game, use the command \"join <GameID> <White/Black>\"";
+        }
+    }
+
+    private String pad(String input, int length) {
+        if (input == null) { return " ".repeat(length); }
+        int inputLength = input.length();
+        if (inputLength >= length) {
+            return input.substring(0, length-1);
+        } else {
+            return input + " ".repeat(length-inputLength);
         }
     }
 
