@@ -2,6 +2,8 @@ package client;
 
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.UserData;
+import serverFacade.RequestResponse.AbbrGameData;
+import serverFacade.RequestResponse.CreateGameRequest;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
@@ -41,6 +43,8 @@ public class UserClient implements Client {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
+                case "games" -> getGames();
+                case "new" -> makeGame(params);
                 case "logout" -> logout();
                 default -> new EvalResult(help(), null, null);
             };
@@ -54,9 +58,9 @@ public class UserClient implements Client {
         return String.format(
                 """
                 Type one of these commands to navigate:
-                - Join a game >>> %s join <game ID> <White/Black> %s
+                - Join a game >>> %s join <GameID> <White/Black> %s
                 - See all games >>> %s games %s
-                - Create a game >>> %s new <gameName> %s
+                - Create a game >>> %s new <GameName> %s
                 - See this message again >>> %s help %s
                 - Logout >>> %s logout %s
                 """,
@@ -66,6 +70,36 @@ public class UserClient implements Client {
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
         );
+    }
+
+    public EvalResult makeGame(String[] params) throws ResponseException {
+        // new <GameName>
+        if (params.length >= 1) {
+            var response = server.makeGame(userAuth.authToken(), new CreateGameRequest(params[0]));
+            return new EvalResult(String.format("Game created with ID: %d", response.gameID()), null, null);
+        } else {
+            throw new ResponseException(400, "Expected: register <username> <password> <email>");
+        }
+    }
+
+    public EvalResult getGames() throws ResponseException {
+        // games
+        var result = server.getGames(userAuth.authToken());
+        String response = listGames(result.games());
+        return new EvalResult(response, null, null);
+    }
+
+    private String listGames(AbbrGameData[] games) {
+        if (games == null || games.length < 1) {
+            return "No games available! Create your own with \"new <GameName>\".";
+        } else {
+            // Come back and format this as a table when working on chess board design
+            printToUser("Game ID : Game Name : White Username : Black Username");
+            for (AbbrGameData game : games) {
+                printToUser(String.format(" %d : %s : %s : %s ", game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername()));
+            }
+            return "To join a game, use the command \"join <GameID>\"";
+        }
     }
 
     public EvalResult logout() throws ResponseException {
