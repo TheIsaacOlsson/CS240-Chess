@@ -11,32 +11,19 @@ public class UserClient implements Client {
     private final Scanner scanner;
     private final AuthData userAuth;
 
+    public ServerFacade getServer() { return server; }
+    public String startupMessage() { return String.format("Welcome, %s!", userAuth.username()); }
+    public String exitCondition() { return "logout"; }
+    public boolean hasChildREPL() { return true; }
+    public String moveToChildCondition() { return "joinGame"; }
+    public void runChildREPL(ServerFacade server, Scanner scanner, AuthData userAuth) {
+        new ChessGameClient(server, scanner, userAuth).run();
+    }
+
     public UserClient(ServerFacade server, Scanner scanner, AuthData auth) {
         this.server = server;
         this.scanner = scanner;
         this.userAuth = auth;
-    }
-
-    public void run() {
-        printToUser("Welcome, " + userAuth.username());
-        printToUser(help());
-
-        EvalResult result = new EvalResult("", null, null);
-        while (!result.message().equals("logout")) {
-            // print ">>> "
-            String line = scanner.nextLine();
-
-            try {
-                // evaluate result
-
-                if (result.message().equals("joinGame")) {
-                    // create new inner repl and pass it the ServerFacade and the scanner
-                }
-            } catch (Throwable e) {
-                // Show the error in the logs, but don't print
-            }
-        }
-        System.out.println();
     }
 
     @Override

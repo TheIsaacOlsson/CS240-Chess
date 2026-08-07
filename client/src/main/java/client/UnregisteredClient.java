@@ -3,7 +3,6 @@ package client;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.UserData;
 import serverFacade.RequestResponse.LoginRequest;
-import serverFacade.RequestResponse.RegisterRequest;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
@@ -15,31 +14,17 @@ import static ui.EscapeSequences.*;
 public class UnregisteredClient implements Client {
     private final ServerFacade server;
 
-    public UnregisteredClient(String serverUrl) throws ResponseException {
-        server = new ServerFacade(serverUrl);
+    public ServerFacade getServer() { return server; }
+    public String startupMessage() { return "Welcome to the chess server! Log in to start."; }
+    public String exitCondition() { return "quit"; }
+    public boolean hasChildREPL() { return true; }
+    public String moveToChildCondition() { return "authorized"; }
+    public void runChildREPL(ServerFacade server, Scanner scanner, AuthData userAuth) {
+        new UserClient(server, scanner, userAuth).run();
     }
 
-    public void run() {
-        printToUser(" Welcome to the chess server! Log in to start.");
-        printToUser(help());
-
-        Scanner scanner = new Scanner(System.in);
-        EvalResult result = new EvalResult("", null, null);
-        while (!result.message().equals("quit")) {
-            printPrompt();
-            String line = scanner.nextLine();
-
-            result = eval(line);
-            // if error, sanitize and return relevant information
-
-            resetOutputStyle();
-            printToUser(result.message());
-
-            if (result.message().equals("authorized")) {
-                new UserClient(server, scanner, result.auth()).run();
-            }
-        }
-        printToUser("");
+    public UnregisteredClient(String serverUrl) throws ResponseException {
+        server = new ServerFacade(serverUrl);
     }
 
     @Override
