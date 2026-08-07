@@ -36,10 +36,10 @@ public class ChessGameClient implements Client {
     public void run() {
         printToUser("Game Joined Successfully");
         ChessGame.TeamColor team = (ChessGame.TeamColor) clientData.get("playerColor");
-        if (team.equals(BLACK)) {
-            printBoard(true);
-        } else {
+        if (team == null || team.equals(WHITE)) {
             printBoard(false);
+        } else {
+            printBoard(true);
         }
 
     }
