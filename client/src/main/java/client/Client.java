@@ -5,7 +5,7 @@ import static ui.EscapeSequences.*;
 public interface Client {
     void run();
 
-    String eval(String input);
+    EvalResult eval(String input);
 
     String help();
 
@@ -21,10 +21,10 @@ public interface Client {
     }
 
     default void printPrompt() {
-        System.out.print("\n>>> ");
+        System.out.print("\n" + RESET_BG_COLOR + ">>> ");
     }
 
     default void resetOutputStyle() {
-        System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_GREEN);
+        System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLUE);
     }
 }

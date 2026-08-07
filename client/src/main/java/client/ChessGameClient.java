@@ -24,7 +24,7 @@ public class ChessGameClient implements Client {
     }
 
     @Override
-    public String eval(String input) {
-        return "";
+    public EvalResult eval(String input) {
+        return new EvalResult("", null, null);
     }
 }

@@ -1,5 +1,6 @@
 package client;
 
+import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.UserData;
 import serverFacade.RequestResponse.LoginRequest;
 import serverFacade.RequestResponse.RegisterRequest;
@@ -9,8 +10,7 @@ import serverFacade.ServerFacade;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
-import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
+import static ui.EscapeSequences.*;
 
 public class UnregisteredClient implements Client {
     private final ServerFacade server;
@@ -24,24 +24,26 @@ public class UnregisteredClient implements Client {
         printToUser(help());
 
         Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
+        EvalResult result = new EvalResult("", null, null);
+        while (!result.message().equals("quit")) {
             printPrompt();
             String line = scanner.nextLine();
 
             result = eval(line);
-            resetOutputStyle();
-            printToUser(result);
+            // if error, sanitize and return relevant information
 
-            if (result.equals("authorized")) {
-                new UserClient(server, scanner).run();
+            resetOutputStyle();
+            printToUser(result.message());
+
+            if (result.message().equals("authorized")) {
+                new UserClient(server, scanner, result.auth()).run();
             }
         }
         printToUser("");
     }
 
     @Override
-    public String eval(String input) {
+    public EvalResult eval(String input) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -49,11 +51,11 @@ public class UnregisteredClient implements Client {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> signIn(params);
-                case "quit" -> "quit";
-                default -> help();
+                case "quit" -> new EvalResult("quit", null, null);
+                default -> new EvalResult(help(), null, null);
             };
         } catch (ResponseException ex) {
-            return ex.getMessage(); // Deal with the error better (sanitize before printing)
+            return new EvalResult("Error", null, ex);
         }
     }
 
@@ -67,28 +69,28 @@ public class UnregisteredClient implements Client {
                 - See this message again >>> %s help %s
                 - Exit the program >>> %s quit %s
                 """,
-                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_GREEN,
-                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_GREEN,
-                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_GREEN,
-                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_GREEN
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
                 );
     }
 
-    public String register(String[] params) throws ResponseException {
+    public EvalResult register(String[] params) throws ResponseException {
         // register <username> <password> <email>
         if (params.length >= 3) {
             var response = server.register(new UserData(params[0], params[1], params[2]));
-            return "authorized"; // Return an object with the output message and other internal information (like errors or authTokens)
+            return new EvalResult("authorized", new AuthData(response.authToken(), response.username()), null);
         } else {
             throw new ResponseException(400, "Expected: register <username> <password> <email>");
         }
     }
 
-    public String signIn(String[] params) {
+    public EvalResult signIn(String[] params) {
         // signin <username> <password>
         if (params.length >= 2) {
             var response = server.login(new LoginRequest(params[0], params[1]));
-            return "authorized";
+            return new EvalResult("authorized", new AuthData(response.authToken(), response.username()), null);
         } else {
             throw new ResponseException(400, "Expected: login <username> <password>");
         }

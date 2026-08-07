@@ -1,5 +1,6 @@
 package client;
 
+import serverFacade.ChessData.AuthData;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 
@@ -8,27 +9,27 @@ import java.util.Scanner;
 public class UserClient implements Client {
     private final ServerFacade server;
     private final Scanner scanner;
+    private final AuthData userAuth;
 
-    public UserClient(ServerFacade server, Scanner scanner) {
+    public UserClient(ServerFacade server, Scanner scanner, AuthData auth) {
         this.server = server;
         this.scanner = scanner;
+        this.userAuth = auth;
     }
 
     public void run() {
-        System.out.print("You successfully signed in");
-        // Personalized welcome by username
-        // help info for registered users
+        printToUser("Welcome, " + userAuth.username());
+        printToUser(help());
 
-        Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("logout")) {
+        EvalResult result = new EvalResult("", null, null);
+        while (!result.message().equals("logout")) {
             // print ">>> "
             String line = scanner.nextLine();
 
             try {
                 // evaluate result
 
-                if (result.equals("joinGame")) {
+                if (result.message().equals("joinGame")) {
                     // create new inner repl and pass it the ServerFacade and the scanner
                 }
             } catch (Throwable e) {
@@ -39,8 +40,8 @@ public class UserClient implements Client {
     }
 
     @Override
-    public String eval(String input) {
-        return "";
+    public EvalResult eval(String input) {
+        return new EvalResult("", null, null);
     }
 
     @Override
