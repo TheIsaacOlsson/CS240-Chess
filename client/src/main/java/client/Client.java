@@ -25,6 +25,7 @@ public interface Client {
             String line = scanner.nextLine();
 
             result = eval(line);
+            assert (! (result.message() == null));
             if (result.message().equals("Error")) {
                 notify(sanitizeError(result.error()));
                 continue;

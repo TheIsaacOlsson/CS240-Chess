@@ -1,17 +1,15 @@
 package websocket;
 
 import com.google.gson.Gson;
-import serverFacade.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
-import org.eclipse.jetty.websocket.api.Session;
 
+import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 
 
 import java.io.IOException;
@@ -22,7 +20,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
-        System.out.println("Websocket connected");
+        System.out.println("Connected");
         ctx.enableAutomaticPings();
     }
 
@@ -41,8 +39,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
-        System.out.println("Websocket closed");
+    public void handleClose(@NotNull WsCloseContext ctx) {
+        System.out.println("Disconnected");
     }
 
     /*

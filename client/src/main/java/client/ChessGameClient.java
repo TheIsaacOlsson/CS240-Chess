@@ -26,9 +26,10 @@ public class ChessGameClient implements Client, NotificationHandler {
     private final Scanner scanner;
     private Map<String, Object> clientData;
     private final boolean orientation;
+    private final boolean spectating;
 
     public Scanner getScanner() { return scanner; }
-    public String startupMessage() { return "Game ID: " + clientData.get("gameID"); }
+    public String startupMessage() { if (spectating) {return "Now spectating";} else {return "Get ready to play";} }
     public String exitCondition() { return "leave"; }
     public boolean hasChildREPL() { return false; }
     public String moveToChildCondition() { return null; }
@@ -38,19 +39,22 @@ public class ChessGameClient implements Client, NotificationHandler {
         this.websocket = new WebSocketFacade((String) (clientData.get("serverUrl")), this);
         this.scanner = scanner;
         this.clientData = clientData;
+
+        assert clientData.containsKey("playerColor");
         ChessGame.TeamColor team = (ChessGame.TeamColor) clientData.get("playerColor");
+        spectating = team == null;
         orientation = team != null && team.equals(BLACK);
     }
 
     @Override
-    public void run() {
-        printToUser("Game Joined Successfully");
-        BoardPrinter.printBoard(new ChessGame(), orientation);
-    }
-
-    @Override
     public String help() {
-        return "";
+        return String.format(
+                """
+                Type one of these commands to navigate:
+                ...
+                """
+                // SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
+        );
     }
 
     @Override
