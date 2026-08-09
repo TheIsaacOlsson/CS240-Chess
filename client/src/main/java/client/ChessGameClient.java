@@ -7,11 +7,13 @@ import chess.ChessPosition;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameLoad;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -20,7 +22,7 @@ import static chess.ChessGame.TeamColor.WHITE;
 import static ui.EscapeSequences.*;
 
 public class ChessGameClient implements Client, NotificationHandler {
-    private final ServerFacade server;
+    private final WebSocketFacade websocket;
     private final Scanner scanner;
     private Map<String, Object> clientData;
     private final boolean orientation;
@@ -32,8 +34,8 @@ public class ChessGameClient implements Client, NotificationHandler {
     public String moveToChildCondition() { return null; }
     public void runChildREPL() {}
 
-    public ChessGameClient(ServerFacade server, Scanner scanner, Map<String, Object> clientData) {
-        this.server = server;
+    public ChessGameClient(Scanner scanner, Map<String, Object> clientData) {
+        this.websocket = new WebSocketFacade((String) (clientData.get("serverUrl")), this);
         this.scanner = scanner;
         this.clientData = clientData;
         ChessGame.TeamColor team = (ChessGame.TeamColor) clientData.get("playerColor");
@@ -53,7 +55,17 @@ public class ChessGameClient implements Client, NotificationHandler {
 
     @Override
     public EvalResult eval(String input) {
-        return new EvalResult("", null);
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                // Add methods
+                default -> new EvalResult(help(), null);
+            };
+        } catch (ResponseException ex) {
+            return new EvalResult("Error", ex);
+        }
     }
 
     @Override

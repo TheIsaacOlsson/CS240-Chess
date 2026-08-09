@@ -27,7 +27,7 @@ public class UserClient implements Client {
     public boolean hasChildREPL() { return true; }
     public String moveToChildCondition() { return "joinGame"; }
     public void runChildREPL() {
-        new ChessGameClient(server, scanner, clientData).run();
+        new ChessGameClient(scanner, clientData).run();
 
         printToUser(help());
     }

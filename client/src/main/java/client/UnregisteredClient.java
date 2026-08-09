@@ -30,6 +30,7 @@ public class UnregisteredClient implements Client {
 
     public UnregisteredClient(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
+        clientData.put("serverUrl", serverUrl);
     }
 
     @Override
