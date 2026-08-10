@@ -48,12 +48,37 @@ public class ChessGameClient implements Client, NotificationHandler {
 
     @Override
     public String help() {
+        if (spectating) {
+            return String.format(
+                    """
+                    Type one of these commands to navigate:
+                    See legal moves for a piece >>> %s legal <x0> %s
+                    Leave the game >>> %s leave %s
+                    Draw the chess board again >>> %s board %s
+                    See this message again >>> %s help %s
+                    """,
+                    SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                    SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                    SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                    SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
+            );
+        }
         return String.format(
                 """
                 Type one of these commands to navigate:
-                ...
-                """
-                // SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
+                Move a piece from square to square >>> %s move <x0> <x0> %s
+                See legal moves for a piece >>> %s legal <x0> %s
+                Leave the game >>> %s leave %s
+                Resign the game >>> %s resign %s
+                Draw the chess board again >>> %s board %s
+                See this message again >>> %s help %s
+                """,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
         );
     }
 
