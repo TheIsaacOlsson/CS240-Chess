@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import serverFacade.ChessData.AuthData;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
 import websocket.NotificationHandler;
@@ -30,12 +31,12 @@ public class ChessGameClient implements Client, NotificationHandler {
 
     public Scanner getScanner() { return scanner; }
     public String startupMessage() { if (spectating) {return "Now spectating";} else {return "Get ready to play";} }
-    public String exitCondition() { return "leave"; }
+    public String exitCondition() { return "You have left the game"; }
     public boolean hasChildREPL() { return false; }
     public String moveToChildCondition() { return null; }
     public void runChildREPL() {}
 
-    public ChessGameClient(Scanner scanner, Map<String, Object> clientData) {
+    public ChessGameClient(Scanner scanner, Map<String, Object> clientData) throws ResponseException {
         this.websocket = new WebSocketFacade((String) (clientData.get("serverUrl")), this);
         this.scanner = scanner;
         this.clientData = clientData;
@@ -44,6 +45,8 @@ public class ChessGameClient implements Client, NotificationHandler {
         ChessGame.TeamColor team = (ChessGame.TeamColor) clientData.get("playerColor");
         spectating = team == null;
         orientation = team != null && team.equals(BLACK);
+
+        tryConnect();
     }
 
     @Override
@@ -89,7 +92,11 @@ public class ChessGameClient implements Client, NotificationHandler {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                // Add methods
+                case "move" -> new EvalResult(help(), null); // Only for players
+                case "legal" -> new EvalResult(help(), null);
+                case "leave" -> leaveGame();
+                case "resign" -> new EvalResult(help(), null); // Only for players
+                case "board" -> new EvalResult(help(), null);
                 default -> new EvalResult(help(), null);
             };
         } catch (ResponseException ex) {
@@ -102,7 +109,16 @@ public class ChessGameClient implements Client, NotificationHandler {
         switch (notification.getServerMessageType()) {
             case NOTIFICATION -> printToUser(((Notification) notification).message);
             case ERROR -> printToUser(((ErrorMessage) notification).message);
-            case LOAD_GAME -> BoardPrinter.printBoard(((GameLoad) notification).gameState, orientation);
+            case LOAD_GAME -> printToUser(BoardPrinter.printBoard(((GameLoad) notification).game, orientation));
         }
+    }
+
+    public void tryConnect() throws ResponseException {
+        websocket.connect((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
+    }
+
+    public EvalResult leaveGame() throws ResponseException {
+        websocket.leave((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
+        return new EvalResult("You have left the game", null);
     }
 }

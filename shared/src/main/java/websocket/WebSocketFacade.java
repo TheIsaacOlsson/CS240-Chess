@@ -1,11 +1,15 @@
 package websocket;
 
 import com.google.gson.Gson;
+import serverFacade.ChessData.AuthData;
 import serverFacade.ResponseException;
 
 import jakarta.websocket.*;
 
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.GameLoad;
+import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -32,6 +36,11 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                    notification = switch (notification.getServerMessageType()) {
+                        case NOTIFICATION -> new Gson().fromJson(message, Notification.class);
+                        case ERROR -> new Gson().fromJson(message, ErrorMessage.class);
+                        case LOAD_GAME -> new Gson().fromJson(message, GameLoad.class);
+                    };
                     notificationHandler.notify(notification);
                 }
             });
@@ -47,6 +56,23 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
+    public void connect(String authToken, Integer gameID) throws ResponseException {
+        try {
+            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void leave(String authToken, Integer gameID) {
+        try {
+            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(400, ex.getMessage());
+        }
+    }
     /*
     public void enterPetShop(String visitorName) throws ResponseException {
         try {

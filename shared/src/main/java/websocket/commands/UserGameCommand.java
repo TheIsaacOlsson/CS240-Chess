@@ -1,5 +1,7 @@
 package websocket.commands;
 
+import serverFacade.ChessData.AuthData;
+
 import java.util.Objects;
 
 /**
@@ -33,7 +35,7 @@ public class UserGameCommand {
         return commandType;
     }
 
-    public String getAuthToken() {
+    public String getAuth() {
         return authToken;
     }
 
@@ -50,12 +52,12 @@ public class UserGameCommand {
             return false;
         }
         return getCommandType() == that.getCommandType() &&
-                Objects.equals(getAuthToken(), that.getAuthToken()) &&
+                Objects.equals(getAuth(), that.getAuth()) &&
                 Objects.equals(getGameID(), that.getGameID());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCommandType(), getAuthToken(), getGameID());
+        return Objects.hash(getCommandType(), getAuth(), getGameID());
     }
 }
