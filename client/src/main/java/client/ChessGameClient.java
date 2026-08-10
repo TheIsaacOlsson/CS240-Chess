@@ -1,7 +1,9 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import serverFacade.ResponseException;
+import ui.BoardPrinter;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 import websocket.messages.ErrorMessage;
@@ -87,7 +89,7 @@ public class ChessGameClient implements Client, NotificationHandler {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "move" -> new EvalResult(help(), null); // Only for players
-                case "legal" -> new EvalResult(help(), null);
+                case "legal" -> seeLegal(params);
                 case "leave" -> leaveGame();
                 case "resign" -> new EvalResult(help(), null); // Only for players
                 case "board" -> printBoard();
@@ -103,7 +105,7 @@ public class ChessGameClient implements Client, NotificationHandler {
         switch (notification.getServerMessageType()) {
             case NOTIFICATION -> printToUser(((Notification) notification).message);
             case ERROR -> printToUser(((ErrorMessage) notification).errorMessage);
-            case LOAD_GAME -> printToUser(BoardPrinter.printBoard(((GameLoad) notification).game, orientation));
+            case LOAD_GAME -> printToUser(BoardPrinter.printBoard(((GameLoad) notification).game, ((GameLoad) notification).highlightSquares, orientation));
         }
     }
 
@@ -119,5 +121,34 @@ public class ChessGameClient implements Client, NotificationHandler {
     public EvalResult printBoard() {
         websocket.refresh((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
         return new EvalResult("", null);
+    }
+
+    public EvalResult seeLegal(String[] params) {
+        if (params.length >= 1) {
+            String location = params[0];
+            ChessPosition position = parseLocation(location);
+            websocket.seeMoves((String) clientData.get("authToken"), (Integer) clientData.get("gameID"), position);
+        } else {
+            throw new ResponseException(400, "Expected: legal <position>");
+        }
+        return new EvalResult("", null);
+    }
+
+    private ChessPosition parseLocation(String location) {
+        try {
+            char letter = location.charAt(0);
+            char number = location.charAt(1);
+
+            int row = number - '0';
+            int col = letter - 'a'+1;
+
+            if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
+                return new ChessPosition(row, col);
+            } else {
+                throw new ResponseException(400, "Position must be between a1 and h8");
+            }
+        } catch (Exception e) {
+            throw new ResponseException(400, "Invalid position");
+        }
     }
 }

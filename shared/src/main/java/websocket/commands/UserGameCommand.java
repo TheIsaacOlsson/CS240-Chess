@@ -28,6 +28,7 @@ public class UserGameCommand {
         CONNECT,
         REFRESH,
         MAKE_MOVE,
+        LEGAL,
         LEAVE,
         RESIGN
     }

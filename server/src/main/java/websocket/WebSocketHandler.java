@@ -1,7 +1,7 @@
 package websocket;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
+import chess.moveCalculators.*;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
 import io.javalin.websocket.WsCloseContext;
@@ -21,6 +21,7 @@ import server.Service.ValidateService;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ResponseException;
+import websocket.commands.LegalMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameLoad;
@@ -29,6 +30,10 @@ import websocket.messages.ServerMessage;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -47,6 +52,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ServerMessage result = switch (command.getCommandType()) {
                 case CONNECT -> connect(command.getGameID(), command.getAuth(), ctx.session);
                 case REFRESH -> refresh(command.getGameID(), command.getAuth(), ctx.session);
+                case LEGAL -> {
+                    command = new Gson().fromJson(ctx.message(), LegalMoveCommand.class);
+                    yield getLegal(command.getGameID(), command.getAuth(), ((LegalMoveCommand) command).getPosition(), ctx.session);
+                }
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
             };
@@ -70,26 +79,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             AuthData auth = GetAuth.getAuth(authToken);
             if (auth == null) {
-                return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(401, "Unauthorized"));
+                return new ErrorMessage(new ResponseException(401, "Unauthorized"));
             }
             username = auth.username();
             GameData gameData = GetGameData.getGameByID(gameID);
             if (gameData == null) {
-                return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(404, "Game not found"));
+                return new ErrorMessage(new ResponseException(404, "Game not found"));
             }
             game = gameData.getGame();
             if (username.equals(gameData.getWhiteUsername())) {team = "White";}
             else if (username.equals(gameData.getBlackUsername())) {team = "Black";}
             else {team = "observer";}
         } catch (ConnectionException ex) {
-            return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
+            return new ErrorMessage(new ResponseException(500, ex.getMessage()));
         }
         connections.add(gameID, session);
 
-        GameLoad load = new GameLoad(ServerMessage.ServerMessageType.LOAD_GAME, game);
+        GameLoad load = new GameLoad(game);
 
 
-        connections.broadcast(gameID, session, new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username + " has joined as " + team));
+        connections.broadcast(gameID, session, new Notification(username + " has joined as " + team));
         return load;
     }
 
@@ -98,12 +107,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ValidateService.isAuthorized(authToken);
             GameData gameData = GetGameData.getGameByID(gameID);
             if (gameData == null) {
-                return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(404, "Game not found"));
+                return new ErrorMessage(new ResponseException(404, "Game not found"));
             }
             ChessGame game = gameData.getGame();
-            return new GameLoad(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            return new GameLoad(game);
         } catch (ConnectionException ex) {
-            return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
+            return new ErrorMessage(new ResponseException(500, ex.getMessage()));
         }
     }
 
@@ -114,11 +123,48 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             username = auth.username();
             LeaveGameService.leaveGame(authToken, gameID);
         } catch (ConnectionException ex) {
-            return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
+            return new ErrorMessage(new ResponseException(500, ex.getMessage()));
         }
         connections.remove(gameID, session);
-        connections.broadcast(gameID, session, new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username + " has left"));
+        connections.broadcast(gameID, session, new Notification(username + " has left"));
         return null;
     }
 
+    private ServerMessage getLegal(Integer gameID, String authToken, ChessPosition position, Session session) {
+        try {
+            ValidateService.isAuthorized(authToken);
+            GameData gameData = GetGameData.getGameByID(gameID);
+            if (gameData == null) {
+                return new ErrorMessage(new ResponseException(404, "Game not found"));
+            }
+            ChessGame game = gameData.getGame();
+            ChessPiece piece = game.getBoard().getPiece(position);
+            if (piece == null) {
+                return new ErrorMessage(new ResponseException(400, "No piece found"));
+            }
+            Collection<ChessMove> possibleMoves = getChessMoves(position, piece, game);
+            Set<ChessPosition> endSquares = new HashSet<>();
+            for (ChessMove move : possibleMoves) {
+                endSquares.add(move.getEndPosition());
+            }
+            GameLoad gameLoad = new GameLoad(game);
+            gameLoad.highlightSquares = endSquares;
+            return gameLoad;
+        } catch (ConnectionException ex) {
+            return new ErrorMessage(new ResponseException(500, ex.getMessage()));
+        }
+    }
+
+    private static Collection<ChessMove> getChessMoves(ChessPosition position, ChessPiece piece, ChessGame game) {
+        ChessPiece.PieceType type = piece.getPieceType();
+        Collection<ChessMove> possibleMoves = switch (type) {
+            case KING -> new KingMoveCalculator(game.getBoard(), position).getMoves();
+            case QUEEN -> new QueenMoveCalculator(game.getBoard(), position).getMoves();
+            case BISHOP -> new BishopMoveCalculator(game.getBoard(), position).getMoves();
+            case KNIGHT -> new KnightMoveCalculator(game.getBoard(), position).getMoves();
+            case ROOK -> new RookMoveCalculator(game.getBoard(), position).getMoves();
+            case PAWN -> new PawnMoveCalculator(game.getBoard(), position).getMoves();
+        };
+        return possibleMoves;
+    }
 }
