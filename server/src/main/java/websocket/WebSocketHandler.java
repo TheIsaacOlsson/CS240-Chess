@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import server.Service.GetAuth;
 import server.Service.GetGameData;
 import server.Service.LeaveGameService;
+import server.Service.ValidateService;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ResponseException;
@@ -44,6 +46,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             ServerMessage result = switch (command.getCommandType()) {
                 case CONNECT -> connect(command.getGameID(), command.getAuth(), ctx.session);
+                case REFRESH -> refresh(command.getGameID(), command.getAuth(), ctx.session);
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
             };
@@ -63,6 +66,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public ServerMessage connect(Integer gameID, String authToken, Session session) throws IOException {
         String username;
         ChessGame game;
+        String team;
         try {
             AuthData auth = GetAuth.getAuth(authToken);
             if (auth == null) {
@@ -74,14 +78,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(404, "Game not found"));
             }
             game = gameData.getGame();
+            if (username.equals(gameData.getWhiteUsername())) {team = "White";}
+            else if (username.equals(gameData.getBlackUsername())) {team = "Black";}
+            else {team = "observer";}
         } catch (ConnectionException ex) {
             return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
         }
         connections.add(gameID, session);
 
         GameLoad load = new GameLoad(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        connections.broadcast(gameID, session, new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username + " is now observing"));
+
+
+        connections.broadcast(gameID, session, new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username + " has joined as " + team));
         return load;
+    }
+
+    private ServerMessage refresh(Integer gameID, String authToken, Session session) throws IOException {
+        try {
+            ValidateService.isAuthorized(authToken);
+            GameData gameData = GetGameData.getGameByID(gameID);
+            if (gameData == null) {
+                return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(404, "Game not found"));
+            }
+            ChessGame game = gameData.getGame();
+            return new GameLoad(ServerMessage.ServerMessageType.LOAD_GAME, game);
+        } catch (ConnectionException ex) {
+            return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
+        }
     }
 
     private ServerMessage leave(Integer gameID, String authToken, Session session) throws IOException {

@@ -90,7 +90,7 @@ public class ChessGameClient implements Client, NotificationHandler {
                 case "legal" -> new EvalResult(help(), null);
                 case "leave" -> leaveGame();
                 case "resign" -> new EvalResult(help(), null); // Only for players
-                case "board" -> new EvalResult(help(), null);
+                case "board" -> printBoard();
                 default -> new EvalResult(help(), null);
             };
         } catch (ResponseException ex) {
@@ -114,5 +114,10 @@ public class ChessGameClient implements Client, NotificationHandler {
     public EvalResult leaveGame() throws ResponseException {
         websocket.leave((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
         return new EvalResult("You have left the game", null);
+    }
+
+    public EvalResult printBoard() {
+        websocket.refresh((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
+        return new EvalResult("", null);
     }
 }
