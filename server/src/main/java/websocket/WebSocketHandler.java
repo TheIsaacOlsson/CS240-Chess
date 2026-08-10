@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import server.Service.GetAuth;
 import server.Service.GetGameData;
+import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ResponseException;
 import websocket.commands.UserGameCommand;
@@ -62,7 +63,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String username;
         ChessGame game;
         try {
-            username = GetAuth.getAuth(authToken).username();
+            AuthData auth = GetAuth.getAuth(authToken);
+            if (auth == null) {
+                return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(401, "Unauthorized"));
+            }
+            username = auth.username();
             GameData gameData = GetGameData.getGameByID(gameID);
             if (gameData == null) {
                 return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(404, "Game not found"));
