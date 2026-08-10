@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import server.Service.GetAuth;
 import server.Service.GetGameData;
+import server.Service.LeaveGameService;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ResponseException;
@@ -46,7 +47,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
             };
-            if (ctx.session.isOpen()) {
+            if (ctx.session.isOpen() && result != null) {
                 ctx.session.getRemote().sendString(new Gson().toJson(result));
             }
         } catch (IOException ex) {
@@ -86,38 +87,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private ServerMessage leave(Integer gameID, String authToken, Session session) throws IOException {
         String username;
         try {
-            username = GetAuth.getAuth(authToken).username();
+            AuthData auth = GetAuth.getAuth(authToken);
+            username = auth.username();
+            LeaveGameService.leaveGame(authToken, gameID);
         } catch (ConnectionException ex) {
             return new ErrorMessage(ServerMessage.ServerMessageType.ERROR, new ResponseException(500, ex.getMessage()));
         }
         connections.remove(gameID, session);
         connections.broadcast(gameID, session, new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username + " has left"));
-        return new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "You left");
+        return null;
     }
 
-    /*
-    private void enter(String visitorName, Session session) throws IOException {
-        connections.add(session);
-        var message = String.format("%s is in the shop", visitorName);
-        var notification = new ServerMessage(ServerMessage.Type.ARRIVAL, message);
-        connections.broadcast(session, notification);
-    }
-
-    private void exit(String visitorName, Session session) throws IOException {
-        var message = String.format("%s left the shop", visitorName);
-        var notification = new ServerMessage(ServerMessage.Type.DEPARTURE, message);
-        connections.broadcast(session, notification);
-        connections.remove(session);
-    }
-
-    public void makeNoise(String petName, String sound) throws ResponseException {
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new ServerMessage(ServerMessage.Type.NOISE, message);
-            connections.broadcast(null, notification);
-        } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
-        }
-    }
-     */
 }

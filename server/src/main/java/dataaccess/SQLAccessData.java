@@ -140,6 +140,18 @@ public class SQLAccessData implements AccessData {
         }
     }
 
+    public void resetPlayer(Integer gameID, ChessGame.TeamColor team) throws ConnectionException {
+        var statement = String.format("UPDATE gameData SET %s = NULL WHERE gameID = ?;", team.equals(WHITE) ? "whiteUsername" : "blackUsername");
+        try {
+            Object[] params = {gameID};
+            executeStatement(statement, params, null);
+        } catch (ConnectionException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to add user to game: %s", e.getMessage());
+        }
+    }
+
     public void deleteAuth(String authToken) throws ConnectionException {
         var statement = "DELETE FROM authData WHERE authToken = ?";
         try {

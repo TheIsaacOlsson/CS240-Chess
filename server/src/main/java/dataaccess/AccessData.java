@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ChessData.UserData;
@@ -16,6 +17,7 @@ public interface AccessData {
     void addAuth(AuthData newAuth) throws ConnectionException;
     Integer addGame(GameData newGame) throws ConnectionException;
     void addToGame(JoinRequest request, String username) throws ConnectionException;
+    void resetPlayer(Integer gameID, ChessGame.TeamColor team) throws ConnectionException;
     void deleteAuth(String authToken) throws ConnectionException;
     void clearDatabase() throws ConnectionException;
 }

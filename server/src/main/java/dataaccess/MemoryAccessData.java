@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ChessData.UserData;
@@ -35,6 +36,15 @@ public class MemoryAccessData implements AccessData {
         switch (request.playerColor()) {
             case WHITE -> requestedGame.setWhiteUsername(username);
             case BLACK -> requestedGame.setBlackUsername(username);
+        }
+    }
+
+    public void resetPlayer(Integer gameID, ChessGame.TeamColor team) {
+        GameData game = getGameByID(gameID);
+        if (team.equals(ChessGame.TeamColor.WHITE)) {
+            game.setWhiteUsername(null);
+        } else if (team.equals(ChessGame.TeamColor.BLACK)) {
+            game.setBlackUsername(null);
         }
     }
 
