@@ -1,12 +1,7 @@
 package client;
 
-import chess.ChessBoard;
 import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
-import serverFacade.ChessData.AuthData;
 import serverFacade.ResponseException;
-import serverFacade.ServerFacade;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 import websocket.messages.ErrorMessage;
@@ -19,7 +14,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 import static chess.ChessGame.TeamColor.BLACK;
-import static chess.ChessGame.TeamColor.WHITE;
 import static ui.EscapeSequences.*;
 
 public class ChessGameClient implements Client, NotificationHandler {
@@ -108,7 +102,7 @@ public class ChessGameClient implements Client, NotificationHandler {
     public void notify(ServerMessage notification) {
         switch (notification.getServerMessageType()) {
             case NOTIFICATION -> printToUser(((Notification) notification).message);
-            case ERROR -> printToUser(((ErrorMessage) notification).message);
+            case ERROR -> printToUser(((ErrorMessage) notification).errorMessage);
             case LOAD_GAME -> printToUser(BoardPrinter.printBoard(((GameLoad) notification).game, orientation));
         }
     }

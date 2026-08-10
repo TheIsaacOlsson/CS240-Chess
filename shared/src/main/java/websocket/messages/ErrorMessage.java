@@ -3,12 +3,12 @@ package websocket.messages;
 import serverFacade.ResponseException;
 
 public class ErrorMessage extends ServerMessage {
-    public String message;
+    public String errorMessage;
 
     public ErrorMessage(ServerMessageType type, ResponseException error) {
         super(type);
         assert type.equals(ServerMessageType.ERROR);
 
-        message = error.getMessage();
+        errorMessage = error.getMessage();
     }
 }
