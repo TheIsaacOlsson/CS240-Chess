@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import serverFacade.ResponseException;
 import ui.BoardPrinter;
@@ -66,12 +67,12 @@ public class ChessGameClient implements Client, NotificationHandler {
         return String.format(
                 """
                 Type one of these commands to navigate:
-                Move a piece from square to square >>> %s move <x0> <x0> %s
-                See legal moves for a piece >>> %s legal <x0> %s
-                Leave the game >>> %s leave %s
-                Resign the game >>> %s resign %s
-                Draw the chess board again >>> %s board %s
-                See this message again >>> %s help %s
+                - Move a piece from square to square >>> %s move <x0> <x0> <promotion>(Optional) %s
+                - See legal moves for a piece >>> %s legal <x0> %s
+                - Leave the game >>> %s leave %s
+                - Resign the game >>> %s resign %s
+                - Draw the chess board again >>> %s board %s
+                - See this message again >>> %s help %s
                 """,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
                 SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
@@ -136,15 +137,28 @@ public class ChessGameClient implements Client, NotificationHandler {
     }
 
     public EvalResult makeMove(String[] params) {
-        if (clientData.get("playerColor") == null) {return new EvalResult("You can't move pieces", new ResponseException(400, "You can't move pieces"));}
+        ChessGame.TeamColor color = (ChessGame.TeamColor) clientData.get("playerColor");
+        if (color == null) {return new EvalResult("You can't move pieces", new ResponseException(400, "You can't move pieces"));}
         if (params.length >= 2) {
             String startLocation = params[0];
             String endLocation = params[1];
             ChessPosition startPosition = parseLocation(startLocation);
             ChessPosition endPosition = parseLocation(endLocation);
-            websocket.move((String) clientData.get("authToken"), (Integer) clientData.get("gameID"), startPosition, endPosition);
+            String promotion = null;
+            ChessPiece.PieceType promotionType = null;
+            if (params.length >= 3) {
+                promotion = params[2];
+                promotionType = switch (promotion) {
+                    case "queen" -> ChessPiece.PieceType.QUEEN;
+                    case "bishop" -> ChessPiece.PieceType.BISHOP;
+                    case "rook" -> ChessPiece.PieceType.ROOK;
+                    case "knight" -> ChessPiece.PieceType.KNIGHT;
+                    default -> null;
+                };
+            }
+            websocket.move((String) clientData.get("authToken"), (Integer) clientData.get("gameID"), startPosition, endPosition, promotionType);
         } else {
-            throw new ResponseException(400, "Expected: legal <position>");
+            throw new ResponseException(400, "Expected: move <position> <promotion>(Optional)");
         }
         return new EvalResult("", null);
     }

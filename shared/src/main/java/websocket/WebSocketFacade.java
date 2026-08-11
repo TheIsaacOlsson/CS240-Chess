@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.Gson;
 import serverFacade.ChessData.AuthData;
@@ -95,9 +96,9 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void move(String authToken, Integer gameID, ChessPosition start, ChessPosition end) {
+    public void move(String authToken, Integer gameID, ChessPosition start, ChessPosition end, ChessPiece.PieceType promotionType) {
         try {
-            var action = new MakeMoveCommand(authToken, gameID, start, end);
+            var action = new MakeMoveCommand(authToken, gameID, start, end, promotionType);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

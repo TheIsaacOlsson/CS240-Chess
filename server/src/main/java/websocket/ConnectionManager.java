@@ -3,6 +3,7 @@ package websocket;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ErrorMessage;
+import websocket.messages.GameLoad;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
@@ -32,7 +33,7 @@ public class ConnectionManager {
         String msg = switch (notification.getServerMessageType()) {
             case NOTIFICATION -> new Gson().toJson((Notification) notification);
             case ERROR -> new Gson().toJson((ErrorMessage) notification);
-            case LOAD_GAME -> null;
+            case LOAD_GAME -> new Gson().toJson((GameLoad) notification);
         };
         if (msg == null) {
             return;

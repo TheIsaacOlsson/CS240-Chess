@@ -57,7 +57,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 }
                 case MAKE_MOVE -> {
                     command = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
-                    yield makeMove(command.getGameID(), command.getAuth(), ((MakeMoveCommand) command).getStart(), ((MakeMoveCommand) command).getEnd(), ctx.session);
+                    yield makeMove(command.getGameID(), command.getAuth(), ((MakeMoveCommand) command).getStart(), ((MakeMoveCommand) command).getEnd(), ((MakeMoveCommand) command).getPromotionType(), ctx.session);
                 }
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
@@ -171,14 +171,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return possibleMoves;
     }
 
-    private ServerMessage makeMove(Integer gameID, String authToken, ChessPosition start, ChessPosition end, Session session) {
+    private ServerMessage makeMove(Integer gameID, String authToken, ChessPosition start, ChessPosition end, ChessPiece.PieceType promotionType, Session session) {
         try {
             String user = GetAuth.getAuth(authToken).username();
 
             GameData gameData = GetGameData.getGameByID(gameID);
             ChessGame game = gameData.getGame();
             ChessGame.TeamColor turn = game.getTeamTurn();
+            ChessGame.TeamColor opponentColor = turn.equals(ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             String currentPlayer = turn.equals(ChessGame.TeamColor.WHITE) ? gameData.getWhiteUsername() : gameData.getBlackUsername();
+            String otherPlayer = turn.equals(ChessGame.TeamColor.WHITE) ? gameData.getBlackUsername() : gameData.getWhiteUsername();
 
             ChessPiece selectedPiece = game.getBoard().getPiece(start);
             if (selectedPiece == null) { return new ErrorMessage(new ResponseException(400, "No piece found"));}
@@ -187,10 +189,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else if ( ! selectedPiece.getTeamColor().equals(turn)) {
                 return new ErrorMessage(new ResponseException(400, "You cannot move this piece"));
             } else {
-                PieceMover.movePiece(gameData, new ChessMove(start, end, null)); // Take care of promotion piece
+                PieceMover.movePiece(gameData, new ChessMove(start, end, promotionType));
+                connections.broadcast(gameID, null, new GameLoad(game));
                 connections.broadcast(gameID, session, new Notification(String.format("%s moved from %s to %s", user, start, end)));
-                // If in check / checkmate, broadcast that
-                return refresh(gameID, authToken, session);
+                if (gameData.getGame().isInCheckmate( opponentColor )) {
+                    connections.broadcast(gameID, null, new Notification(String.format("%s is in checkmate", otherPlayer)));
+                } else if (gameData.getGame().isInCheck( opponentColor )) {
+                    connections.broadcast(gameID, null, new Notification(String.format("%s is in checkmate", otherPlayer)));
+                }
+                return null;
             }
         } catch (DataAccessException e) {
             return new ErrorMessage(new ResponseException(500, "Cannot make move"));
