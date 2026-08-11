@@ -13,12 +13,14 @@ import java.util.Objects;
 public class ChessGame {
 
     private TeamColor turn;
+    private TeamColor winner;
     private ChessBoard gameBoard;
     private ChessPosition whiteKingPosition;
     private ChessPosition blackKingPosition;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
+        winner = null;
         gameBoard = new ChessBoard();
         gameBoard.resetBoard();
         whiteKingPosition = new ChessPosition(1, 5);
@@ -196,6 +198,7 @@ public class ChessGame {
             if ( ! validMoves(occupiedPosition).isEmpty()) {return false;}
         }
 
+        winner = teamColor.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         return true;
     }
 
@@ -246,6 +249,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return gameBoard;
+    }
+
+    public TeamColor getWinner() {
+        return winner;
+    }
+
+    public void resign(TeamColor team) {
+        winner = team.equals(TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     @Override

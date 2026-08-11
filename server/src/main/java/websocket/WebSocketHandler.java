@@ -57,9 +57,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 }
                 case MAKE_MOVE -> {
                     command = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
-                    yield makeMove(command.getGameID(), command.getAuth(), ((MakeMoveCommand) command).getStart(), ((MakeMoveCommand) command).getEnd(), ((MakeMoveCommand) command).getPromotionType(), ctx.session);
+                    yield makeMove(command.getGameID(), command.getAuth(), ((MakeMoveCommand) command).getMove(), ctx.session);
                 }
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
+                case RESIGN -> resign(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
             };
             if (ctx.session.isOpen() && result != null) {
@@ -133,6 +134,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return null;
     }
 
+    private ServerMessage resign(Integer gameID, String authToken, Session session) throws IOException {
+        String username;
+        try {
+            AuthData auth = GetAuth.getAuth(authToken);
+            username = auth.username();
+            ResignationService.resignGame(gameID, authToken);
+        } catch (DataAccessException ex) {
+            return new ErrorMessage(new ResponseException(500, ex.getMessage()));
+        }
+        connections.broadcast(gameID, session, new Notification(username + " has resigned."));
+        return null;
+    }
+
     private ServerMessage getLegal(Integer gameID, String authToken, ChessPosition position, Session session) {
         try {
             ValidateService.isAuthorized(authToken);
@@ -159,43 +173,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private static Collection<ChessMove> getChessMoves(ChessPosition position, ChessPiece piece, ChessGame game) {
-        ChessPiece.PieceType type = piece.getPieceType();
-        Collection<ChessMove> possibleMoves = switch (type) {
-            case KING -> new KingMoveCalculator(game.getBoard(), position).getMoves();
-            case QUEEN -> new QueenMoveCalculator(game.getBoard(), position).getMoves();
-            case BISHOP -> new BishopMoveCalculator(game.getBoard(), position).getMoves();
-            case KNIGHT -> new KnightMoveCalculator(game.getBoard(), position).getMoves();
-            case ROOK -> new RookMoveCalculator(game.getBoard(), position).getMoves();
-            case PAWN -> new PawnMoveCalculator(game.getBoard(), position).getMoves();
-        };
-        return possibleMoves;
+        return game.validMoves(position);
     }
 
-    private ServerMessage makeMove(Integer gameID, String authToken, ChessPosition start, ChessPosition end, ChessPiece.PieceType promotionType, Session session) {
+    private ServerMessage makeMove(Integer gameID, String authToken, ChessMove move, Session session) {
         try {
-            String user = GetAuth.getAuth(authToken).username();
+            AuthData auth = GetAuth.getAuth(authToken);
+            if (auth == null) {return new ErrorMessage(new ResponseException(401, "Unauthorized"));}
+            String user = auth.username();
 
             GameData gameData = GetGameData.getGameByID(gameID);
             ChessGame game = gameData.getGame();
+            if (game.getWinner() != null) {return new ErrorMessage(new ResponseException(400, "The game has ended"));}
             ChessGame.TeamColor turn = game.getTeamTurn();
             ChessGame.TeamColor opponentColor = turn.equals(ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             String currentPlayer = turn.equals(ChessGame.TeamColor.WHITE) ? gameData.getWhiteUsername() : gameData.getBlackUsername();
             String otherPlayer = turn.equals(ChessGame.TeamColor.WHITE) ? gameData.getBlackUsername() : gameData.getWhiteUsername();
 
-            ChessPiece selectedPiece = game.getBoard().getPiece(start);
+            ChessPiece selectedPiece = game.getBoard().getPiece(move.getStartPosition());
             if (selectedPiece == null) { return new ErrorMessage(new ResponseException(400, "No piece found"));}
             else if ( ! user.equals(currentPlayer) ) {
                 return new ErrorMessage(new ResponseException(400, "It is not your turn"));
             } else if ( ! selectedPiece.getTeamColor().equals(turn)) {
                 return new ErrorMessage(new ResponseException(400, "You cannot move this piece"));
             } else {
-                PieceMover.movePiece(gameData, new ChessMove(start, end, promotionType));
+                PieceMover.movePiece(gameData, move);
                 connections.broadcast(gameID, null, new GameLoad(game));
-                connections.broadcast(gameID, session, new Notification(String.format("%s moved from %s to %s", user, start, end)));
+                connections.broadcast(gameID, session, new Notification(String.format("%s moved from %s to %s", user, move.getStartPosition(), move.getEndPosition())));
                 if (gameData.getGame().isInCheckmate( opponentColor )) {
-                    connections.broadcast(gameID, null, new Notification(String.format("%s is in checkmate", otherPlayer)));
+                    connections.broadcast(gameID, null, new Notification(String.format("%s is in checkmate. %s wins!", otherPlayer, user)));
                 } else if (gameData.getGame().isInCheck( opponentColor )) {
-                    connections.broadcast(gameID, null, new Notification(String.format("%s is in checkmate", otherPlayer)));
+                    connections.broadcast(gameID, null, new Notification(String.format("%s is in check", otherPlayer)));
                 }
                 return null;
             }

@@ -93,7 +93,7 @@ public class ChessGameClient implements Client, NotificationHandler {
                 case "move" -> makeMove(params); // Only for players
                 case "legal" -> seeLegal(params);
                 case "leave" -> leaveGame();
-                case "resign" -> new EvalResult(help(), null); // Only for players
+                case "resign" -> resign(); // Only for players
                 case "board" -> printBoard();
                 default -> new EvalResult(help(), null);
             };
@@ -118,6 +118,13 @@ public class ChessGameClient implements Client, NotificationHandler {
     public EvalResult leaveGame() throws ResponseException {
         websocket.leave((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
         return new EvalResult("You have left the game", null);
+    }
+
+    public EvalResult resign() throws ResponseException {
+        ChessGame.TeamColor color = (ChessGame.TeamColor) clientData.get("playerColor");
+        if (color == null) {return new EvalResult("You can't resign", new ResponseException(400, "You can't resign"));}
+        websocket.resign((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
+        return new EvalResult("You have resigned", null);
     }
 
     public EvalResult printBoard() {
