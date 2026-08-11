@@ -93,7 +93,8 @@ public class ChessGameClient implements Client, NotificationHandler {
                 case "move" -> makeMove(params); // Only for players
                 case "legal" -> seeLegal(params);
                 case "leave" -> leaveGame();
-                case "resign" -> resign(); // Only for players
+                case "resign" -> clientData.containsKey("resignation") ? confirmResignation() : resign(); // Only for players
+                case "cancel" -> cancelResignation();
                 case "board" -> printBoard();
                 default -> new EvalResult(help(), null);
             };
@@ -117,14 +118,37 @@ public class ChessGameClient implements Client, NotificationHandler {
 
     public EvalResult leaveGame() throws ResponseException {
         websocket.leave((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
+        clientData.remove("resignation");
         return new EvalResult("You have left the game", null);
     }
 
-    public EvalResult resign() throws ResponseException {
+    public EvalResult resign() {
         ChessGame.TeamColor color = (ChessGame.TeamColor) clientData.get("playerColor");
         if (color == null) {return new EvalResult("You can't resign", new ResponseException(400, "You can't resign"));}
+        clientData.put("resignation", true);
+        return new EvalResult(resignationPrompt(), null);
+    }
+
+    private String resignationPrompt() {
+        return String.format(
+                """
+                        Are you sure you want to resign?
+                        - To confirm >>>%s resign %s
+                        - To cancel >>>%s cancel %s
+                        """,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE,
+                SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_BLUE
+        );
+    }
+
+    public EvalResult confirmResignation() throws ResponseException {
         websocket.resign((String) clientData.get("authToken"), (Integer) clientData.get("gameID"));
         return new EvalResult("You have resigned", null);
+    }
+
+    public EvalResult cancelResignation() {
+        clientData.remove("resignation");
+        return new EvalResult("", null);
     }
 
     public EvalResult printBoard() {
