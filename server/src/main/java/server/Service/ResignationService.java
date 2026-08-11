@@ -7,6 +7,8 @@ import dataaccess.DataAccessException;
 import dataaccess.Database;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
+import serverFacade.ResponseException;
+import websocket.messages.ErrorMessage;
 
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
@@ -17,6 +19,7 @@ public class ResignationService {
             String user = GetAuth.getAuth(authToken).username();
             GameData gameData = GetGameData.getGameByID(gameID);
             ChessGame game = gameData.getGame();
+            if (game.getWinner() != null) {throw new DataAccessException("The game has ended");}
             if (user.equals(gameData.getWhiteUsername())) {game.resign(WHITE);}
             else if (user.equals(gameData.getBlackUsername())) {game.resign(BLACK);}
             else {throw new DataAccessException("Cannot resign");}

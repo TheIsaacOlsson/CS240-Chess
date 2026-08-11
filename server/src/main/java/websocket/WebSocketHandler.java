@@ -144,7 +144,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return new ErrorMessage(new ResponseException(500, ex.getMessage()));
         }
         connections.broadcast(gameID, session, new Notification(username + " has resigned."));
-        return null;
+        return new Notification("You resigned");
     }
 
     private ServerMessage getLegal(Integer gameID, String authToken, ChessPosition position, Session session) {
