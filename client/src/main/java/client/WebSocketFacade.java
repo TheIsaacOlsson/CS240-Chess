@@ -1,13 +1,13 @@
-package websocket;
+package client;
 
 import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.Gson;
-import serverFacade.ChessData.AuthData;
 import serverFacade.ResponseException;
 
 import jakarta.websocket.*;
 
+import websocket.NotificationHandler;
 import websocket.commands.LegalMoveCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;

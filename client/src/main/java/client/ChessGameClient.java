@@ -1,13 +1,11 @@
 package client;
 
 import chess.ChessGame;
-import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import serverFacade.ResponseException;
 import ui.BoardPrinter;
 import websocket.NotificationHandler;
-import websocket.WebSocketFacade;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameLoad;
 import websocket.messages.Notification;
