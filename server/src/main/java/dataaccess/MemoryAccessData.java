@@ -39,6 +39,10 @@ public class MemoryAccessData implements AccessData {
         }
     }
 
+    public void updateGame(GameData updatedGame) {
+        MemoryDatabase.updateGame(updatedGame);
+    }
+
     public void resetPlayer(Integer gameID, ChessGame.TeamColor team) {
         GameData game = getGameByID(gameID);
         if (team.equals(ChessGame.TeamColor.WHITE)) {

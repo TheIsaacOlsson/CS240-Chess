@@ -140,6 +140,18 @@ public class SQLAccessData implements AccessData {
         }
     }
 
+    public void updateGame(GameData updatedGame) throws ConnectionException {
+        var statement = "UPDATE gameData SET game = ? WHERE gameID = ?;";
+        try {
+            Object[] params = {updatedGame.getGame(), updatedGame.getGameID()};
+            executeStatement(statement, params, null);
+        } catch (ConnectionException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            System.out.printf("Unable to update game: %s", e.getMessage());
+        }
+    }
+
     public void resetPlayer(Integer gameID, ChessGame.TeamColor team) throws ConnectionException {
         var statement = String.format("UPDATE gameData SET %s = NULL WHERE gameID = ?;", team.equals(WHITE) ? "whiteUsername" : "blackUsername");
         try {

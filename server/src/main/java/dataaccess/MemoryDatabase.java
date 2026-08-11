@@ -47,6 +47,10 @@ public class MemoryDatabase {
         return game.getGameID();
     }
 
+    public static void updateGame(GameData updatedGame) {
+        games.put(updatedGame.getGameID(), updatedGame);
+    }
+
     private static Integer generateID() {
         Map<Integer, GameData> allGames = getGames();
         while (allGames.containsKey(nextID)) {

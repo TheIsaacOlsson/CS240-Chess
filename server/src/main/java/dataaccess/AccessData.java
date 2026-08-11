@@ -16,6 +16,7 @@ public interface AccessData {
     void addUser(UserData newUser) throws ConnectionException;
     void addAuth(AuthData newAuth) throws ConnectionException;
     Integer addGame(GameData newGame) throws ConnectionException;
+    void updateGame(GameData updatedGame) throws ConnectionException;
     void addToGame(JoinRequest request, String username) throws ConnectionException;
     void resetPlayer(Integer gameID, ChessGame.TeamColor team) throws ConnectionException;
     void deleteAuth(String authToken) throws ConnectionException;

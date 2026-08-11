@@ -8,6 +8,7 @@ import serverFacade.ResponseException;
 import jakarta.websocket.*;
 
 import websocket.commands.LegalMoveCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameLoad;
@@ -88,6 +89,15 @@ public class WebSocketFacade extends Endpoint {
     public void seeMoves(String authToken, Integer gameID, ChessPosition position) {
         try {
             var action = new LegalMoveCommand(authToken, gameID, position);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void move(String authToken, Integer gameID, ChessPosition start, ChessPosition end) {
+        try {
+            var action = new MakeMoveCommand(authToken, gameID, start, end);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

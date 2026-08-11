@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPosition;
 import serverFacade.ResponseException;
 import ui.BoardPrinter;
@@ -88,7 +89,7 @@ public class ChessGameClient implements Client, NotificationHandler {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "move" -> new EvalResult(help(), null); // Only for players
+                case "move" -> makeMove(params); // Only for players
                 case "legal" -> seeLegal(params);
                 case "leave" -> leaveGame();
                 case "resign" -> new EvalResult(help(), null); // Only for players
@@ -128,6 +129,20 @@ public class ChessGameClient implements Client, NotificationHandler {
             String location = params[0];
             ChessPosition position = parseLocation(location);
             websocket.seeMoves((String) clientData.get("authToken"), (Integer) clientData.get("gameID"), position);
+        } else {
+            throw new ResponseException(400, "Expected: legal <position>");
+        }
+        return new EvalResult("", null);
+    }
+
+    public EvalResult makeMove(String[] params) {
+        if (clientData.get("playerColor") == null) {return new EvalResult("You can't move pieces", new ResponseException(400, "You can't move pieces"));}
+        if (params.length >= 2) {
+            String startLocation = params[0];
+            String endLocation = params[1];
+            ChessPosition startPosition = parseLocation(startLocation);
+            ChessPosition endPosition = parseLocation(endLocation);
+            websocket.move((String) clientData.get("authToken"), (Integer) clientData.get("gameID"), startPosition, endPosition);
         } else {
             throw new ResponseException(400, "Expected: legal <position>");
         }

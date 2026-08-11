@@ -4,6 +4,7 @@ import chess.*;
 import chess.moveCalculators.*;
 import com.google.gson.Gson;
 import dataaccess.ConnectionException;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -14,14 +15,12 @@ import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.websocket.api.Session;
 
 import org.jetbrains.annotations.NotNull;
-import server.Service.GetAuth;
-import server.Service.GetGameData;
-import server.Service.LeaveGameService;
-import server.Service.ValidateService;
+import server.Service.*;
 import serverFacade.ChessData.AuthData;
 import serverFacade.ChessData.GameData;
 import serverFacade.ResponseException;
 import websocket.commands.LegalMoveCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameLoad;
@@ -55,6 +54,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEGAL -> {
                     command = new Gson().fromJson(ctx.message(), LegalMoveCommand.class);
                     yield getLegal(command.getGameID(), command.getAuth(), ((LegalMoveCommand) command).getPosition(), ctx.session);
+                }
+                case MAKE_MOVE -> {
+                    command = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+                    yield makeMove(command.getGameID(), command.getAuth(), ((MakeMoveCommand) command).getStart(), ((MakeMoveCommand) command).getEnd(), ctx.session);
                 }
                 case LEAVE -> leave(command.getGameID(), command.getAuth(), ctx.session);
                 default -> throw new IOException();
@@ -166,5 +169,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             case PAWN -> new PawnMoveCalculator(game.getBoard(), position).getMoves();
         };
         return possibleMoves;
+    }
+
+    private ServerMessage makeMove(Integer gameID, String authToken, ChessPosition start, ChessPosition end, Session session) {
+        try {
+            String user = GetAuth.getAuth(authToken).username();
+
+            GameData gameData = GetGameData.getGameByID(gameID);
+            ChessGame game = gameData.getGame();
+            ChessGame.TeamColor turn = game.getTeamTurn();
+            String currentPlayer = turn.equals(ChessGame.TeamColor.WHITE) ? gameData.getWhiteUsername() : gameData.getBlackUsername();
+
+            ChessPiece selectedPiece = game.getBoard().getPiece(start);
+            if (selectedPiece == null) { return new ErrorMessage(new ResponseException(400, "No piece found"));}
+            else if ( ! user.equals(currentPlayer) ) {
+                return new ErrorMessage(new ResponseException(400, "It is not your turn"));
+            } else if ( ! selectedPiece.getTeamColor().equals(turn)) {
+                return new ErrorMessage(new ResponseException(400, "You cannot move this piece"));
+            } else {
+                PieceMover.movePiece(gameData, new ChessMove(start, end, null)); // Take care of promotion piece
+                connections.broadcast(gameID, session, new Notification(String.format("%s moved from %s to %s", user, start, end)));
+                // If in check / checkmate, broadcast that
+                return refresh(gameID, authToken, session);
+            }
+        } catch (DataAccessException e) {
+            return new ErrorMessage(new ResponseException(500, "Cannot make move"));
+        } catch (IOException ex) {
+            return new ErrorMessage(new ResponseException(500, "Can't broadcast move"));
+        }
     }
 }
